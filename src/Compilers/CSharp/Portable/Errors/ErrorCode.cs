@@ -404,6 +404,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         ERR_InvalidAttributeArgument = 591,
         ERR_AttributeOnBadSymbolType = 592,
         ERR_FloatOverflow = 594,
+        ERR_InvalidReal = 595,
         ERR_ComImportWithoutUuidAttribute = 596,
         ERR_InvalidNamedArgument = 599,
         ERR_DllImportOnInvalidMethod = 601,
@@ -1151,7 +1152,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         ERR_GlobalDefinitionOrStatementExpected = 7017,
         ERR_ExpectedSingleScript = 7018,
         ERR_RecursivelyTypedVariable = 7019,
-        ERR_ReturnNotAllowedInScript = 7020,
+        ERR_YieldNotAllowedInScript = 7020,
         ERR_NamespaceNotAllowedInScript = 7021,
         WRN_MainIgnored = 7022,
         ERR_StaticInAsOrIs = 7023,
@@ -1316,5 +1317,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         ERR_PPLoadFollowsToken = 8098,
         ERR_SourceFileReferencesNotSupported = 8099,
         ERR_BadAwaitInStaticVariableInitializer = 8100,
+        ERR_InvalidPathMap = 8101,
+        ERR_PublicSignButNoKey = 8102,
     }
 }

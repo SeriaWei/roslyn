@@ -123,7 +123,6 @@ namespace Microsoft.CodeAnalysis.MSBuild
         /// </summary>
         public async Task<SolutionInfo> LoadSolutionInfoAsync(
             string solutionFilePath,
-            IReadOnlyDictionary<string, ProjectId> projectPathToProjectIdMap = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (solutionFilePath == null)
@@ -233,7 +232,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
         /// </summary>
         public async Task<ImmutableArray<ProjectInfo>> LoadProjectInfoAsync(
             string projectFilePath, 
-            IReadOnlyDictionary<string, ProjectId> projectPathToProjectIdMap = null, 
+            ImmutableDictionary<string, ProjectId> projectPathToProjectIdMap = null, 
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (projectFilePath == null)
@@ -257,7 +256,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
 
         private class LoadState
         {
-            private Dictionary<ProjectId, ProjectInfo> _projetIdToProjectInfoMap
+            private Dictionary<ProjectId, ProjectInfo> _projectIdToProjectInfoMap
                 = new Dictionary<ProjectId, ProjectInfo>();
 
             private List<ProjectInfo> _projectInfoList
@@ -276,13 +275,13 @@ namespace Microsoft.CodeAnalysis.MSBuild
 
             public void Add(ProjectInfo info)
             {
-                _projetIdToProjectInfoMap.Add(info.Id, info);
+                _projectIdToProjectInfoMap.Add(info.Id, info);
                 _projectInfoList.Add(info);
             }
 
             public bool TryGetValue(ProjectId id, out ProjectInfo info)
             {
-                return _projetIdToProjectInfoMap.TryGetValue(id, out info);
+                return _projectIdToProjectInfoMap.TryGetValue(id, out info);
             }
 
             public IReadOnlyList<ProjectInfo> Projects

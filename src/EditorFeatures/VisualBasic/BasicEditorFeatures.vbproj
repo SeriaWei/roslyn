@@ -9,9 +9,8 @@
     <ProjectGuid>{49BFAE50-1BCE-48AE-BC89-78B7D90A3ECD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>Microsoft.CodeAnalysis.VisualBasic.EditorFeatures</AssemblyName>
-    <SolutionDir Condition="'$(SolutionDir)' == '' OR '$(SolutionDir)' == '*Undefined*'">..\..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
   <ItemGroup Label="Project References">
     <ProjectReference Include="..\..\Compilers\Core\Portable\CodeAnalysis.csproj">
@@ -173,7 +172,6 @@
     <Compile Include="NavigationBar\GenerateMethodItem.vb" />
     <Compile Include="NavigationBar\VisualBasicNavigationBarItemService.vb" />
     <Compile Include="Outlining\BannerTextBuilder.vb" />
-    <Compile Include="Outlining\Outliners\AbstractSyntaxNodeOutliner.vb" />
     <Compile Include="Outlining\Outliners\AccessorDeclarationOutliner.vb" />
     <Compile Include="Outlining\Outliners\CompilationUnitOutliner.vb" />
     <Compile Include="Outlining\Outliners\ConstructorDeclarationOutliner.vb" />

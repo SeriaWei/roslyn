@@ -100,32 +100,26 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.CodeModel
             Throw New NotSupportedException
         End Function
 
-        Protected Sub TestAutoImplementedPropertyExtender_IsAutoImplemented(code As XElement, expected As Boolean)
-            Using state = CreateCodeModelTestState(GetWorkspaceDefinition(code))
-                Dim codeElement = state.GetCodeElementAtCursor(Of EnvDTE80.CodeProperty2)()
-                Assert.NotNull(codeElement)
+        Protected Async Function TestAutoImplementedPropertyExtender_IsAutoImplemented(code As XElement, expected As Boolean) As Threading.Tasks.Task
+            Await TestElement(code,
+                Sub(codeElement)
+                    Assert.Equal(expected, AutoImplementedPropertyExtender_GetIsAutoImplemented(codeElement))
+                End Sub)
+        End Function
 
-                Assert.Equal(expected, AutoImplementedPropertyExtender_GetIsAutoImplemented(codeElement))
-            End Using
-        End Sub
+        Protected Async Function TestGetter(code As XElement, verifier As Action(Of EnvDTE.CodeFunction)) As Threading.Tasks.Task
+            Await TestElement(code,
+                Sub(codeElement)
+                    verifier(codeElement.Getter)
+                End Sub)
+        End Function
 
-        Protected Sub TestGetter(code As XElement, verifier As Action(Of EnvDTE.CodeFunction))
-            Using state = CreateCodeModelTestState(GetWorkspaceDefinition(code))
-                Dim codeElement = state.GetCodeElementAtCursor(Of EnvDTE80.CodeProperty2)()
-                Assert.NotNull(codeElement)
-
-                verifier(codeElement.Getter)
-            End Using
-        End Sub
-
-        Protected Sub TestSetter(code As XElement, verifier As Action(Of EnvDTE.CodeFunction))
-            Using state = CreateCodeModelTestState(GetWorkspaceDefinition(code))
-                Dim codeElement = state.GetCodeElementAtCursor(Of EnvDTE80.CodeProperty2)()
-                Assert.NotNull(codeElement)
-
-                verifier(codeElement.Setter)
-            End Using
-        End Sub
+        Protected Async Function TestSetter(code As XElement, verifier As Action(Of EnvDTE.CodeFunction)) As Threading.Tasks.Task
+            Await TestElement(code,
+                Sub(codeElement)
+                    verifier(codeElement.Setter)
+                End Sub)
+        End Function
 
     End Class
 End Namespace

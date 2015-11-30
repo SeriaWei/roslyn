@@ -234,6 +234,15 @@ namespace Microsoft.CodeAnalysis {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t create a metadata reference to an assembly without location..
+        /// </summary>
+        internal static string CantCreateReferenceToAssemblyWithoutLocation {
+            get {
+                return ResourceManager.GetString("CantCreateReferenceToAssemblyWithoutLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t create a metadata reference to a dynamic assembly..
         /// </summary>
         internal static string CantCreateReferenceToDynamicAssembly {
@@ -393,15 +402,6 @@ namespace Microsoft.CodeAnalysis {
         internal static string EmptyOrInvalidResourceName {
             get {
                 return ResourceManager.GetString("EmptyOrInvalidResourceName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A value in the pathMap is empty..
-        /// </summary>
-        internal static string EmptyValueInPathMap {
-            get {
-                return ResourceManager.GetString("EmptyValueInPathMap", resourceCulture);
             }
         }
         
@@ -861,6 +861,15 @@ namespace Microsoft.CodeAnalysis {
         internal static string NotWritableException {
             get {
                 return ResourceManager.GetString("NotWritableException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A value in the pathMap is null..
+        /// </summary>
+        internal static string NullValueInPathMap {
+            get {
+                return ResourceManager.GetString("NullValueInPathMap", resourceCulture);
             }
         }
         
