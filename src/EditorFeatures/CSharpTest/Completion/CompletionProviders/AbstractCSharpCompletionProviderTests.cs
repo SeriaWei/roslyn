@@ -131,14 +131,14 @@ text;
 
         protected async Task VerifySendEnterThroughToEnterAsync(string initialMarkup, string textTypedSoFar, bool sendThroughEnterEnabled, bool expected)
         {
-            using (var workspace = await CSharpWorkspaceFactory.CreateWorkspaceFromFileAsync(initialMarkup))
+            using (var workspace = await TestWorkspace.CreateCSharpAsync(initialMarkup))
             {
                 var hostDocument = workspace.DocumentWithCursor;
                 var documentId = workspace.GetDocumentId(hostDocument);
                 var document = workspace.CurrentSolution.GetDocument(documentId);
                 var position = hostDocument.CursorPosition.Value;
 
-                var completionList = GetCompletionList(document, position, CompletionTriggerInfo.CreateInvokeCompletionTriggerInfo());
+                var completionList = await GetCompletionListAsync(document, position, CompletionTriggerInfo.CreateInvokeCompletionTriggerInfo());
                 var item = completionList.Items.First(i => i.DisplayText.StartsWith(textTypedSoFar));
 
                 var optionService = workspace.Services.GetService<IOptionService>();
@@ -160,7 +160,7 @@ text;
 
         private async Task VerifyTextualTriggerCharacterWorkerAsync(string markup, bool expectedTriggerCharacter, bool triggerOnLetter)
         {
-            using (var workspace = await CSharpWorkspaceFactory.CreateWorkspaceFromFileAsync(markup))
+            using (var workspace = await TestWorkspace.CreateCSharpAsync(markup))
             {
                 var document = workspace.Documents.Single();
                 var position = document.CursorPosition.Value;
@@ -197,16 +197,16 @@ text;
         protected async Task VerifyCommitCharactersAsync(string initialMarkup, string textTypedSoFar, char[] validChars, char[] invalidChars = null)
         {
             Assert.NotNull(validChars);
-            invalidChars = invalidChars ?? new [] { 'x' };
+            invalidChars = invalidChars ?? new[] { 'x' };
 
-            using (var workspace = await CSharpWorkspaceFactory.CreateWorkspaceFromFileAsync(initialMarkup))
+            using (var workspace = await TestWorkspace.CreateCSharpAsync(initialMarkup))
             {
                 var hostDocument = workspace.DocumentWithCursor;
                 var documentId = workspace.GetDocumentId(hostDocument);
                 var document = workspace.CurrentSolution.GetDocument(documentId);
                 var position = hostDocument.CursorPosition.Value;
 
-                var completionList = GetCompletionList(document, position, CompletionTriggerInfo.CreateInvokeCompletionTriggerInfo());
+                var completionList = await GetCompletionListAsync(document, position, CompletionTriggerInfo.CreateInvokeCompletionTriggerInfo());
                 var item = completionList.Items.First(i => i.DisplayText.StartsWith(textTypedSoFar));
 
                 var completionService = document.Project.LanguageServices.GetService<ICompletionService>();
@@ -224,7 +224,7 @@ text;
             }
         }
 
-        protected async Task TestCommonIsTextualTriggerCharacterAsync ()
+        protected async Task TestCommonIsTextualTriggerCharacterAsync()
         {
             var alwaysTriggerList = new[]
             {

@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
         {
             private const int SpansPerLineOfInput = 2;
 
-            private static readonly object SuppressPromptInjectionTag = new object();
+            private static readonly object s_suppressPromptInjectionTag = new object();
 
             private readonly InteractiveWindow _window;
 
@@ -45,8 +45,8 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             /// Returns `null` to indicate we don't record undo history for operations in standard-input buffer.
             /// This is exposed only for test purpose.
             /// </summary>
-            public ITextUndoHistory UndoHistory => 
-                ReadingStandardInput ? null :_undoManager.TextBufferUndoHistory;
+            public ITextUndoHistory UndoHistory =>
+                ReadingStandardInput ? null : _undoManager.TextBufferUndoHistory;
 
             private readonly History _history = new History();
             private string _historySearch;
@@ -291,7 +291,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 RemoveProtection(OutputBuffer, _outputProtection);
                 RemoveProtection(StandardInputBuffer, _standardInputProtection);
 
-                using (var edit = OutputBuffer.CreateEdit(EditOptions.None, null, SuppressPromptInjectionTag))
+                using (var edit = OutputBuffer.CreateEdit(EditOptions.None, null, s_suppressPromptInjectionTag))
                 {
                     edit.Delete(0, OutputBuffer.CurrentSnapshot.Length);
                     edit.Apply();
@@ -301,7 +301,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 OutputClassifierProvider.ClearSpans(OutputBuffer);
                 _outputTrackingCaretPosition = 0;
 
-                using (var edit = StandardInputBuffer.CreateEdit(EditOptions.None, null, SuppressPromptInjectionTag))
+                using (var edit = StandardInputBuffer.CreateEdit(EditOptions.None, null, s_suppressPromptInjectionTag))
                 {
                     edit.Delete(0, StandardInputBuffer.CurrentSnapshot.Length);
                     edit.Apply();
@@ -467,7 +467,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
 
             private void AppendLineNoPromptInjection(ITextBuffer buffer)
             {
-                using (var edit = buffer.CreateEdit(EditOptions.None, null, SuppressPromptInjectionTag))
+                using (var edit = buffer.CreateEdit(EditOptions.None, null, s_suppressPromptInjectionTag))
                 {
                     edit.Insert(buffer.CurrentSnapshot.Length, _lineBreakString);
                     edit.Apply();
@@ -475,9 +475,26 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             }
 
             /// <summary>Implements <see cref="IInteractiveWindowOperations2.TypeChar"/>.</summary>
-            internal void TypeChar(char typedChar)
+            public void TypeChar(char typedChar)
             {
-                InsertText(typedChar.ToString());
+                using (var transaction = UndoHistory?.CreateTransaction(InteractiveWindowResources.TypeChar))
+                {
+                    if (transaction != null)
+                    {
+                        var mergeDirections = TextTransactionMergeDirections.Forward | TextTransactionMergeDirections.Backward;
+                        // replacing selected text should be an atomic undo operation).
+                        if ((!TextView.Selection.IsEmpty && !IsEmptyBoxSelection()))
+                        {
+                            mergeDirections = TextTransactionMergeDirections.Forward;
+                        }
+                        transaction.MergePolicy = new TextTransactionMergePolicy(mergeDirections);
+                    }
+
+                    if (InsertText(typedChar.ToString()))
+                    {
+                        transaction?.Complete();
+                    }
+                }
             }
 
             /// <summary>Implements <see cref="IInteractiveWindow.InsertCode"/>.</summary>
@@ -498,44 +515,39 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 }
             }
 
-            private void InsertText(string text)
+            private bool InsertText(string text)
             {
-                using (var transaction = UndoHistory?.CreateTransaction(InteractiveWindowResources.TypeChar))
+                var selection = TextView.Selection;
+                var caretPosition = TextView.Caret.Position.BufferPosition;
+                if (!TextView.Selection.IsEmpty)
                 {
-                    var selection = TextView.Selection;
-                    var caretPosition = TextView.Caret.Position.BufferPosition;
-                    if (!TextView.Selection.IsEmpty)
+                    if (!IsSelectionInsideCurrentSubmission())
                     {
-                        if (!IsSelectionInsideCurrentSubmission())
-                        {
-                            return;
-                        }
-
-                        DeleteSelection();
-
-                        if (selection.Mode == TextSelectionMode.Box)
-                        {
-                            ReduceBoxSelectionToEditableBox(isDelete: true);
-                        }
-                        else
-                        {
-                            selection.Clear();
-                            MoveCaretToClosestEditableBuffer();
-                        }
+                        return false;
                     }
-                    else if (IsInActivePrompt(caretPosition))
+
+                    DeleteSelection();
+
+                    if (selection.Mode == TextSelectionMode.Box)
                     {
+                        ReduceBoxSelectionToEditableBox(isDelete: true);
+                    }
+                    else
+                    {
+                        selection.Clear();
                         MoveCaretToClosestEditableBuffer();
                     }
-                    else if (MapToEditableBuffer(caretPosition) == null)
-                    {
-                        return;
-                    }
-
-                    EditorOperations.InsertText(text);
-
-                    transaction?.Complete();
                 }
+                else if (IsInActivePrompt(caretPosition))
+                {
+                    MoveCaretToClosestEditableBuffer();
+                }
+                else if (MapToEditableBuffer(caretPosition) == null)
+                {
+                    return false;
+                }
+
+                return EditorOperations.InsertText(text);
             }
 
             /// <summary>Implements the core of <see cref="IInteractiveWindow.SubmitAsync"/>.</summary>
@@ -975,17 +987,17 @@ namespace Microsoft.VisualStudio.InteractiveWindow
 
             private void InsertProjectionSpan(int index, object span)
             {
-                _projectionBuffer.ReplaceSpans(index, 0, new[] { span }, EditOptions.None, editTag: SuppressPromptInjectionTag);
+                _projectionBuffer.ReplaceSpans(index, 0, new[] { span }, EditOptions.None, editTag: s_suppressPromptInjectionTag);
             }
 
             private void ReplaceProjectionSpan(int spanToReplace, ITrackingSpan newSpan)
             {
-                _projectionBuffer.ReplaceSpans(spanToReplace, 1, new[] { newSpan }, EditOptions.None, editTag: SuppressPromptInjectionTag);
+                _projectionBuffer.ReplaceSpans(spanToReplace, 1, new[] { newSpan }, EditOptions.None, editTag: s_suppressPromptInjectionTag);
             }
 
             private void RemoveProjectionSpans(int index, int count)
             {
-                _projectionBuffer.ReplaceSpans(index, count, Array.Empty<object>(), EditOptions.None, SuppressPromptInjectionTag);
+                _projectionBuffer.ReplaceSpans(index, count, Array.Empty<object>(), EditOptions.None, s_suppressPromptInjectionTag);
             }
 
             /// <summary>
@@ -1044,7 +1056,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 RemoveProtection(OutputBuffer, _outputProtection);
 
                 // append the text to output buffer and make sure it ends with a line break:
-                using (var edit = OutputBuffer.CreateEdit(EditOptions.None, null, SuppressPromptInjectionTag))
+                using (var edit = OutputBuffer.CreateEdit(EditOptions.None, null, s_suppressPromptInjectionTag))
                 {
                     foreach (string text in output)
                     {
@@ -1431,7 +1443,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             private void AppendProjectionSpans(object span1, object span2)
             {
                 int index = _projectionBuffer.CurrentSnapshot.SpanCount;
-                _projectionBuffer.ReplaceSpans(index, 0, new[] { span1, span2 }, EditOptions.None, editTag: SuppressPromptInjectionTag);
+                _projectionBuffer.ReplaceSpans(index, 0, new[] { span1, span2 }, EditOptions.None, editTag: s_suppressPromptInjectionTag);
             }
 
             private bool TryGetCurrentLanguageBufferExtent(IProjectionSnapshot projectionSnapshot, out Span result)
@@ -1465,7 +1477,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             private void ProjectionBufferChanged(object sender, TextContentChangedEventArgs e)
             {
                 // this is an edit performed in this event:
-                if (e.EditTag == SuppressPromptInjectionTag)
+                if (e.EditTag == s_suppressPromptInjectionTag)
                 {
                     return;
                 }
@@ -1671,7 +1683,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                     lastEnd = edit.End;
                 }
 
-                _projectionBuffer.ReplaceSpans(start, end - start, replacement, EditOptions.None, SuppressPromptInjectionTag);
+                _projectionBuffer.ReplaceSpans(start, end - start, replacement, EditOptions.None, s_suppressPromptInjectionTag);
             }
 
             private object CreateTrackingSpan(SnapshotSpan snapshotSpan)
@@ -2124,7 +2136,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 var selection = TextView.Selection;
 
                 // if the span is already selected select all text in the projection buffer:
-                if (span == null || 
+                if (span == null ||
                     !selection.IsEmpty && selection.SelectedSpans.Count == 1 && selection.SelectedSpans[0] == span.Value)
                 {
                     var currentSnapshot = TextView.TextBuffer.CurrentSnapshot;
@@ -2384,7 +2396,6 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             {
                 using (var transaction = UndoHistory?.CreateTransaction(InteractiveWindowResources.Backspace))
                 {
-
                     if (DeleteHelper(isBackspace: true))
                     {
                         transaction?.Complete();
@@ -2427,7 +2438,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
 
                     if (IsEmptyBoxSelection())
                     {
-                        return isBackspace ? EditorOperations.Backspace() : EditorOperations.Delete();                        
+                        return isBackspace ? EditorOperations.Backspace() : EditorOperations.Delete();
                     }
 
                     DeleteSelection();
@@ -2499,19 +2510,13 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                     }
                     else
                     {
-                        var selection = TextView.Selection;
-                        var startPoint = selection.Start.Position.GetContainingLine().Start;
-                        var projectionSpans = TextView.BufferGraph.MapUpToSnapshot(new SnapshotSpan(startPoint,
-                                                                                                    selection.End.Position.GetContainingLine().EndIncludingLineBreak),
-                                                                                   SpanTrackingMode.EdgeInclusive,
-                                                                                   _projectionBuffer.CurrentSnapshot);
-                        CopySpans(projectionSpans, lineCutCopyTag: true, boxCutCopyTag: false);
+                        var projectionSpans = CopySelectedLines();
                         if (!IsSpanCollectionInsideCurrentSubmission(projectionSpans))
                         {
                             return;
                         }
                         DeleteSpans(projectionSpans);
-                        selection.Clear();
+                        TextView.Selection.Clear();
                     }
                     MoveCaretToClosestEditableBuffer();
                     TextView.Caret.EnsureVisible();
@@ -2519,7 +2524,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                     transaction?.Complete();
                 }
             }
-            
+
             /// <summary>
             /// Returns true if the entire selection is inside current submission.
             /// Current submission includes all active prompt buffers and all editable buffers
@@ -2726,7 +2731,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                     return true;
                 }
             }
-            
+
             /// <summary>
             /// Implements <see cref="IInteractiveWindowOperations.Cut"/>.
             /// Cut is logically expressed as a combination of Copy and Delete.
@@ -2784,6 +2789,38 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 }
             }
 
+            /// <summary>Implements <see cref="IInteractiveWindowOperations2.CopyCode"/>.</summary>
+            public void CopyCode()
+            {
+                var selection = TextView.Selection;
+                NormalizedSnapshotSpanCollection spans;
+                if (selection.IsEmpty)
+                {
+                    spans = GetSpansFromCurrentLine();
+                }
+                else
+                {
+                    spans = selection.SelectedSpans;
+                }
+
+                var inputSpans = new List<SnapshotSpan>();
+                foreach (var span in spans)
+                {
+                    // For each selected source buffer span, if the span is in input buffer, 
+                    // the lambda function generates the corresponding snapshot span in the source buffer snapshot, otherwise it returns null.
+                    GetValuesFromSpan<SnapshotSpan>(inputSpans,
+                        span,
+                        (kind, snapshot, s) => kind == ReplSpanKind.Input ? new SnapshotSpan(snapshot, s) : (SnapshotSpan?)null);
+                }
+                var projectionInputSpans = new List<SnapshotSpan>();
+                foreach (var inputSpan in inputSpans)
+                {
+                    projectionInputSpans.AddRange(TextView.BufferGraph.MapUpToSnapshot(inputSpan, SpanTrackingMode.EdgeInclusive, _projectionBuffer.CurrentSnapshot));
+                }
+                var projectSpans = new NormalizedSnapshotSpanCollection(projectionInputSpans);
+                CopySpans(projectSpans, lineCutCopyTag: selection.IsEmpty, boxCutCopyTag: !selection.IsEmpty && selection.Mode == TextSelectionMode.Box);
+            }
+
             private void CopySelection()
             {
                 Debug.Assert(!TextView.Selection.IsEmpty);
@@ -2794,10 +2831,33 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             private void CopyCurrentLine()
             {
                 Debug.Assert(TextView.Selection.IsEmpty);
+                CopySpans(GetSpansFromCurrentLine(), lineCutCopyTag: true, boxCutCopyTag: false);
+            }
 
+            private NormalizedSnapshotSpanCollection GetSpansFromCurrentLine()
+            {
                 var snapshotLine = TextView.Caret.Position.VirtualBufferPosition.Position.GetContainingLine();
                 var span = new SnapshotSpan(snapshotLine.Start, snapshotLine.LengthIncludingLineBreak);
-                CopySpans(new NormalizedSnapshotSpanCollection(span), lineCutCopyTag: true, boxCutCopyTag: false);
+                return new NormalizedSnapshotSpanCollection(span);
+            }
+
+            private NormalizedSnapshotSpanCollection CopySelectedLines()
+            {
+                Debug.Assert(!TextView.Selection.IsEmpty);
+                var selectedLines = GetSpansFromSelectedLines();
+                CopySpans(selectedLines, lineCutCopyTag: true, boxCutCopyTag: false);
+                return selectedLines;
+            }
+
+            private NormalizedSnapshotSpanCollection GetSpansFromSelectedLines()
+            {
+                var selection = TextView.Selection;
+                var startPoint = selection.Start.Position.GetContainingLine().Start;
+                var projectionSpans = TextView.BufferGraph.MapUpToSnapshot(new SnapshotSpan(startPoint,
+                                                                                            selection.End.Position.GetContainingLine().EndIncludingLineBreak),
+                                                                           SpanTrackingMode.EdgeInclusive,
+                                                                           _projectionBuffer.CurrentSnapshot);
+                return projectionSpans;
             }
 
             /// <summary>
@@ -2816,18 +2876,18 @@ namespace Microsoft.VisualStudio.InteractiveWindow
 
                 var data = new DataObject();
 
-                var text = GetText(spans);
+                var text = GetText(spans, boxCutCopyTag);
                 data.SetData(DataFormats.Text, text);
                 data.SetData(DataFormats.StringFormat, text);
                 data.SetData(DataFormats.UnicodeText, text);
 
-                var blocks = GetTextBlocks(spans);
+                var blocks = GetTextBlocks(spans, boxCutCopyTag);
                 data.SetData(ClipboardFormat, blocks);
 
                 string rtf = null;
                 try
                 {
-                    rtf = GenerateRtf(spans);
+                    rtf = GenerateRtf(spans, boxCutCopyTag);
                 }
                 catch (OperationCanceledException)
                 {
@@ -2853,7 +2913,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 _window.InteractiveWindowClipboard.SetDataObject(data, true);
             }
 
-            private string GenerateRtf(NormalizedSnapshotSpanCollection spans)
+            private string GenerateRtf(NormalizedSnapshotSpanCollection spans, bool isBoxSelection)
             {
                 // This behavior is consistent with VS editor. 
                 // Don't generate RTF for large spans (since it is expensive and probably not wanted).
@@ -2862,7 +2922,9 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 {
                     using (var dialog = _waitIndicator.StartWait(InteractiveWindowResources.WaitTitle, InteractiveWindowResources.WaitMessage, allowCancel: true))
                     {
-                        return _rtfBuilderService.GenerateRtf(spans, dialog.CancellationToken);
+                        return isBoxSelection
+                            ? _rtfBuilderService.GenerateRtf(spans, dialog.CancellationToken)
+                            : _rtfBuilderService.GenerateRtf(spans, string.Empty, dialog.CancellationToken);
                     }
                 }
                 else
@@ -2873,20 +2935,27 @@ namespace Microsoft.VisualStudio.InteractiveWindow
 
             /// <summary>
             /// Get the text of the given spans.
-            /// If there are multiple spans, then return the concatenation of the text of each span plus a newline character,
-            /// otherwise, simply return the text of the only span.
+            /// If there are multiple spans, then returns either concatenation of text from each span or concatenation of text plus a newline character,
+            /// depends on whether the multiple spans is because box selection. Otherwise, simply returns the text of the only span.
             /// </summary>
-            private string GetText(NormalizedSnapshotSpanCollection spans)
+            private string GetText(NormalizedSnapshotSpanCollection spans, bool isBoxSelection)
             {
                 Debug.Assert(spans.Count > 0);
 
                 if (spans.Count > 1)
                 {
+                    var newline = EditorOperations.Options.GetNewLineCharacter();
                     var builder = new StringBuilder();
-                    builder.Append(string.Join(EditorOperations.Options.GetNewLineCharacter(), spans.Select((span) => span.GetText()).ToArray()));
+                    foreach (var span in spans)
+                    {
+                        builder.Append(span.GetText());
 
-                    // Append one last newline character
-                    builder.Append(EditorOperations.Options.GetNewLineCharacter());
+                        // If spans are got from box selection, add a newline after each span.
+                        if (isBoxSelection)
+                        {
+                            builder.Append(newline);
+                        }
+                    }
                     return builder.ToString();
                 }
                 else
@@ -2898,16 +2967,22 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             /// <summary>
             /// Get the text of the given spans as a serialized BufferBlock[].
             /// </summary>
-            private string GetTextBlocks(NormalizedSnapshotSpanCollection spans)
+            private string GetTextBlocks(NormalizedSnapshotSpanCollection spans, bool isBoxSelection)
             {
-                // Since spans is got from selection, only box selection has more than one 
-                // SnapshotSpan in spans. If this is the case, we use 'LineBreak' block to separate different lines of box selection.
-                var AddNewLineBlock = spans.Count > 1;
                 var blocks = new List<BufferBlock>();
                 foreach (var span in spans)
                 {
-                    GetTextBlocks(blocks, span);
-                    if (AddNewLineBlock)
+                    // The lambda function generates a BufferBlock for each selected source buffer span
+                    GetValuesFromSpan<BufferBlock>(blocks, span, (kind, snapshot, s) =>
+                                                                    {
+                                                                        if (kind == ReplSpanKind.LineBreak)
+                                                                        {
+                                                                            kind = ReplSpanKind.Output;
+                                                                        }
+                                                                        return new BufferBlock(kind, snapshot.GetText(s));
+                                                                    });
+                    // If spans are got from box selection, we use 'LineBreak' block to separate different lines of box selection.
+                    if (isBoxSelection)
                     {
                         blocks.Add(new BufferBlock(ReplSpanKind.LineBreak, EditorOperations.Options.GetNewLineCharacter()));
                     }
@@ -2915,7 +2990,12 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                 return BufferBlock.Serialize(blocks.ToArray());
             }
 
-            private void GetTextBlocks(List<BufferBlock> blocks, SnapshotSpan span)
+            /// <summary>
+            /// Maps given snapshot span into a list of spans in source buffers, and let the user provided delegate generates an object of type T 
+            /// for each span and added it to the list if it is not null.
+            /// </summary>
+            private void GetValuesFromSpan<T>(List<T> list, SnapshotSpan span, Func<ReplSpanKind, ITextSnapshot, Span, T?> generateValue)
+                where T : struct
             {
                 // Find the range of source spans that cover the span.
                 var sourceSpans = GetSourceSpans(span.Snapshot);
@@ -2942,12 +3022,14 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                         if (intersection.HasValue && !intersection.Value.IsEmpty)
                         {
                             var kind = GetSpanKind(sourceSpan);
-                            if (kind == ReplSpanKind.LineBreak)
+                            var interactionValue = intersection.Value;
+                            var content = sourceSnapshot.GetText(interactionValue);
+
+                            var TValue = generateValue(kind, sourceSnapshot, interactionValue);
+                            if (TValue.HasValue)
                             {
-                                kind = ReplSpanKind.Output;
+                                list.Add(TValue.Value);
                             }
-                            var content = sourceSnapshot.GetText(intersection.Value);
-                            blocks.Add(new BufferBlock(kind, content));
                             added = true;
                         }
                     }
@@ -2957,7 +3039,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
                     }
                 }
             }
-            
+
             /// <summary>
             /// Deletes characters preceding the current caret position in the current language buffer.
             /// 

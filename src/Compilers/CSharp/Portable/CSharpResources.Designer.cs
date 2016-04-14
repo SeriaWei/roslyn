@@ -800,7 +800,7 @@ namespace Microsoft.CodeAnalysis.CSharp {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Argument {0} should not be passed with the &apos;{1}&apos; keyword.
+        ///   Looks up a localized string similar to Argument {0} may not be passed with the &apos;{1}&apos; keyword.
         /// </summary>
         internal static string ERR_BadArgExtraRef {
             get {
@@ -7046,6 +7046,15 @@ namespace Microsoft.CodeAnalysis.CSharp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occurred while writing the output file: {0}.
+        /// </summary>
+        internal static string ERR_PeWritingFailure {
+            get {
+                return ResourceManager.GetString("ERR_PeWritingFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Neither &apos;is&apos; nor &apos;as&apos; is valid on pointer types.
         /// </summary>
         internal static string ERR_PointerInAsOrIs {
@@ -8122,6 +8131,15 @@ namespace Microsoft.CodeAnalysis.CSharp {
         internal static string ERR_TooManyLocals {
             get {
                 return ResourceManager.GetString("ERR_TooManyLocals", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combined length of user strings used by the program exceeds allowed limit. Try to decrease use of string literals..
+        /// </summary>
+        internal static string ERR_TooManyUserStrings {
+            get {
+                return ResourceManager.GetString("ERR_TooManyUserStrings", resourceCulture);
             }
         }
         
@@ -9761,6 +9779,15 @@ namespace Microsoft.CodeAnalysis.CSharp {
         internal static string SyntaxTreeFromLoadNoRemoveReplace {
             get {
                 return ResourceManager.GetString("SyntaxTreeFromLoadNoRemoveReplace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Syntax tree should be created from a submission..
+        /// </summary>
+        internal static string SyntaxTreeIsNotASubmission {
+            get {
+                return ResourceManager.GetString("SyntaxTreeIsNotASubmission", resourceCulture);
             }
         }
         

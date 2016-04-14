@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Editor.Shared.Extensions;
@@ -9,6 +10,7 @@ using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Differencing;
+using Microsoft.VisualStudio.Text.Operations;
 using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.Completion
@@ -36,10 +38,18 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.Completion
 
             // NOTE(cyrusn): It is intentional that we get the undo history for the
             // surface buffer and not the subject buffer.
-            using (var transaction = _undoHistoryRegistry.GetHistory(this.TextView.TextBuffer).CreateTransaction(EditorFeaturesResources.IntelliSense))
+            // There have been some watsons where the ViewBuffer hadn't been registered,
+            // so use TryGetHistory instead.
+            ITextUndoHistory undoHistory;
+            _undoHistoryRegistry.TryGetHistory(this.TextView.TextBuffer, out undoHistory);
+
+            using (var transaction = undoHistory?.CreateTransaction(EditorFeaturesResources.IntelliSense))
             {
                 // We want to merge with any of our other programmatic edits (e.g. automatic brace completion)
-                transaction.MergePolicy = AutomaticCodeChangeMergePolicy.Instance;
+                if (transaction != null)
+                {
+                    transaction.MergePolicy = AutomaticCodeChangeMergePolicy.Instance;
+                }
 
                 // Check if the provider wants to perform custom commit itself.  Otherwise we will
                 // handle things.
@@ -110,27 +120,49 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.Completion
                         }
                     }
 
-                    transaction.Complete();
+                    transaction?.Complete();
                 }
                 else
                 {
                     // Let the provider handle this.
                     provider.Commit(item, this.TextView, this.SubjectBuffer, model.TriggerSnapshot, commitChar);
-                    transaction.Complete();
+                    transaction?.Complete();
                 }
             }
 
             var document = this.SubjectBuffer.CurrentSnapshot.GetOpenDocumentInCurrentContextWithChanges();
             var formattingService = document.GetLanguageService<IEditorFormattingService>();
-            if (formattingService != null &&
-                (item.ShouldFormatOnCommit || (commitChar != null && formattingService.SupportsFormattingOnTypedCharacter(document, commitChar.GetValueOrDefault()))))
+
+            var commitCharTriggersFormatting = commitChar != null &&
+                    (formattingService?.SupportsFormattingOnTypedCharacter(document, commitChar.GetValueOrDefault())
+                     ?? false);
+
+            if (formattingService != null && (item.ShouldFormatOnCommit || commitCharTriggersFormatting))
             {
                 // Formatting the completion item affected span is done as a separate transaction because this gives the user
                 // the flexibility to undo the formatting but retain the changes associated with the completion item
                 using (var formattingTransaction = _undoHistoryRegistry.GetHistory(this.TextView.TextBuffer).CreateTransaction(EditorFeaturesResources.IntelliSenseCommitFormatting))
                 {
-                    var changes = formattingService.GetFormattingChangesAsync(document, textChange.Span, CancellationToken.None).WaitAndGetResult(CancellationToken.None);
-                    document.Project.Solution.Workspace.ApplyTextChanges(document.Id, changes, CancellationToken.None);
+                    var caretPoint = this.TextView.GetCaretPoint(this.SubjectBuffer);
+                    IList<TextChange> changes;
+                    if (commitCharTriggersFormatting && caretPoint.HasValue)
+                    {
+                        // if the commit character is supported by formatting service, then let the formatting service
+                        // find the appropriate range to format.
+                        changes = formattingService.GetFormattingChangesAsync(document, commitChar.Value, caretPoint.Value.Position, CancellationToken.None).WaitAndGetResult(CancellationToken.None);
+                    }
+                    else
+                    {
+                        // if this is not a supported trigger character for formatting service (space or tab etc.)
+                        // then format the span of the textchange.
+                        changes = formattingService.GetFormattingChangesAsync(document, textChange.Span, CancellationToken.None).WaitAndGetResult(CancellationToken.None);
+                    }
+
+                    if (changes != null && !changes.IsEmpty())
+                    {
+                        document.Project.Solution.Workspace.ApplyTextChanges(document.Id, changes, CancellationToken.None);
+                    }
+
                     formattingTransaction.Complete();
                 }
             }

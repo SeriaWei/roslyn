@@ -10,7 +10,7 @@ namespace Roslyn.Test.Utilities
     {
         public ConditionalFactAttribute(params Type[] skipConditions)
         {
-            foreach (var skipCondition in skipConditions) 
+            foreach (var skipCondition in skipConditions)
             {
                 ExecutionCondition condition = (ExecutionCondition)Activator.CreateInstance(skipCondition);
                 if (condition.ShouldSkip)
@@ -44,9 +44,20 @@ namespace Roslyn.Test.Utilities
 
     public class IsEnglishLocal : ExecutionCondition
     {
-        public override bool ShouldSkip => 
-                System.Globalization.CultureInfo.CurrentCulture != new System.Globalization.CultureInfo("en-US");
+        public override bool ShouldSkip =>
+            !System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase);
 
         public override string SkipReason => "Current culture is not en-US";
+    }
+
+    public class IsRelease : ExecutionCondition
+    {
+#if DEBUG
+        public override bool ShouldSkip => true;
+#else
+        public override bool ShouldSkip => false;
+#endif
+
+        public override string SkipReason => "Not in release mode.";
     }
 }

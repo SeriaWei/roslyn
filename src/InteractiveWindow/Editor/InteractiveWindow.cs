@@ -62,7 +62,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
         /// WARNING: Members of this object should only be accessed from the UI thread.
         /// </remarks>
         private readonly UIThreadOnly _uiOnly;
-                     
+
         // Setter for InteractiveWindowClipboard is a test hook.  
         internal InteractiveWindowClipboard InteractiveWindowClipboard { get; set; } = new SystemClipboard();
 
@@ -382,6 +382,11 @@ namespace Microsoft.VisualStudio.InteractiveWindow
             UIThread(uiOnly => uiOnly.Copy());
         }
 
+        void IInteractiveWindowOperations2.CopyCode()
+        {
+            UIThread(uiOnly => uiOnly.CopyCode());
+        }
+
         bool IInteractiveWindowOperations.Backspace()
         {
             return UIThread(uiOnly => uiOnly.Backspace());
@@ -400,7 +405,7 @@ namespace Microsoft.VisualStudio.InteractiveWindow
         bool IInteractiveWindowOperations.Return()
         {
             return UIThread(uiOnly => uiOnly.Return());
-        }   
+        }
 
         void IInteractiveWindowOperations2.DeleteLine()
         {

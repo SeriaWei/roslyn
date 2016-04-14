@@ -123,14 +123,14 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.TableDataSource
                     return GetItemKey(data);
                 }
 
-                var argumentKey = args.Id as DiagnosticIncrementalAnalyzer.ArgumentKey;
-                if (argumentKey == null)
+                var liveArgsId = args.Id as LiveDiagnosticUpdateArgsId;
+                if (liveArgsId == null)
                 {
                     return GetItemKey(data);
                 }
 
                 var documents = args.Solution.GetRelatedDocumentIds(args.DocumentId);
-                return new AggregatedKey(documents, argumentKey.Analyzer, argumentKey.StateType);
+                return new AggregatedKey(documents, liveArgsId.Analyzer, liveArgsId.Kind);
             }
 
             private void PopulateInitialData(Workspace workspace, IDiagnosticService diagnosticService)
@@ -366,7 +366,6 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.TableDataSource
 
                     switch (value)
                     {
-
                         case WellKnownDiagnosticTags.Build:
                             // any error from build is highest priority
                             return ErrorRank.Lexical;

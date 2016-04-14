@@ -35,7 +35,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim solution = workspace.CurrentSolution
                 Dim project = solution.Projects(0)
                 Dim workspaceDiagnosticAnalyzer = New WorkspaceDiagnosticAnalyzer()
@@ -117,14 +117,12 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                 Assert.Equal(workspaceDiagnosticAnalyzer.DiagDescriptor.Id, descriptors(0).Id)
 
                 ' Add an existing workspace analyzer to the project, ensure no duplicate diagnostics.
-                Dim duplicateProjectAnalyzers = ImmutableArray.Create(Of DiagnosticAnalyzer)(workspaceDiagnosticAnalyzer)
-                Dim duplicateProjectAnalyzersReference = New AnalyzerImageReference(duplicateProjectAnalyzers)
+                Dim duplicateProjectAnalyzersReference = diagnosticService.HostAnalyzerReferences.FirstOrDefault()
                 project = project.WithAnalyzerReferences({duplicateProjectAnalyzersReference})
 
                 ' Verify duplicate descriptors or diagnostics.
-                ' We don't do de-duplication of analyzer that belong to different layer (host and project)
                 descriptorsMap = diagnosticService.GetDiagnosticDescriptors(project)
-                Assert.Equal(2, descriptorsMap.Count)
+                Assert.Equal(1, descriptorsMap.Count)
                 descriptors = descriptorsMap.Values.SelectMany(Function(d) d).OrderBy(Function(d) d.Id).ToImmutableArray()
                 Assert.Equal(workspaceDiagnosticAnalyzer.DiagDescriptor.Id, descriptors(0).Id)
 
@@ -132,11 +130,11 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                 diagnostics = diagnosticService.GetDiagnosticsForSpanAsync(document,
                                                                     document.GetSyntaxRootAsync().WaitAndGetResult(CancellationToken.None).FullSpan
                                                                     ).WaitAndGetResult(CancellationToken.None)
-                Assert.Equal(2, diagnostics.Count())
+                Assert.Equal(1, diagnostics.Count())
             End Using
         End Sub
 
-        <WpfFact>
+        <Fact>
         Public Sub TestEmptyProjectAnalyzers()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -146,7 +144,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects(0)
                 Dim workspaceDiagnosticAnalyzer = New WorkspaceDiagnosticAnalyzer()
 
@@ -169,7 +167,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact>
+        <Fact>
         Public Sub TestNameCollisionOnDisplayNames()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -179,7 +177,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects(0)
 
                 Dim referenceName = "Test"
@@ -217,7 +215,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects(0)
                 Dim workspaceDiagnosticAnalyzer = New WorkspaceDiagnosticAnalyzer()
 
@@ -261,7 +259,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact>
+        <Fact>
         Public Sub TestProjectAnalyzerMessages()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -276,7 +274,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim projectDiagnosticAnalyzer1 = New ProjectDiagnosticAnalyzer(1)
                 Dim projectDiagnosticAnalyzer2 = New ProjectDiagnosticAnalyzer2(2)
 
@@ -308,7 +306,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact>
+        <Fact>
         Public Sub TestGlobalAnalyzerGroup()
             Dim test = <Workspace>
                            <Project Language="Visual Basic" CommonReferences="true">
@@ -318,7 +316,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim analyzer1 = New ProjectDiagnosticAnalyzer(1)
                 Dim analyzer2 = New ProjectDiagnosticAnalyzer2(2)
 
@@ -333,7 +331,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(923324), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <Fact, WorkItem(923324, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/923324"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestDuplicateFileAnalyzers()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -343,7 +341,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzerReference1 = CreateAnalyzerFileReference("x:\temp.dll")
                 Dim analyzerReference2 = CreateAnalyzerFileReference("x:\temp.dll")
@@ -354,7 +352,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(1091877), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(1091877, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1091877"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestDuplicateFileAnalyzers2()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -364,7 +362,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 ' Add duplicate analyzer references: one as VSIX analyzer reference and other one as project analyzer reference.
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzerReference1 = CreateAnalyzerFileReference(Assembly.GetExecutingAssembly().Location)
@@ -388,7 +386,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(923324), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <Fact, WorkItem(923324, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/923324"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestDuplicateImageAnalyzers()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -398,7 +396,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New ProjectDiagnosticAnalyzer(0)
                 Dim analyzerReference1 = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -411,7 +409,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(937956), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(937956, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/937956"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestDiagnosticAnalyzerExceptionHandledGracefully()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -421,7 +419,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New ThrowsExceptionAnalyzer
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -444,8 +442,8 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(937915), Trait(Traits.Feature, Traits.Features.Diagnostics)>
-        <WorkItem(759)>
+        <WpfFact, WorkItem(937915, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/937915"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WorkItem(759, "https://github.com/dotnet/roslyn/issues/759")>
         Public Sub TestDiagnosticAnalyzerExceptionHandledGracefully2()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -455,7 +453,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New CodeBlockStartedAnalyzer(Of Microsoft.CodeAnalysis.CSharp.SyntaxKind)
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -483,7 +481,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(1167439), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <Fact, WorkItem(1167439, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1167439"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestDiagnosticAnalyzerExceptionHandledNoCrash()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -491,7 +489,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New CodeBlockStartedAnalyzer(Of Microsoft.CodeAnalysis.CSharp.SyntaxKind)
 
@@ -512,7 +510,41 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(937939), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(937939, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/937939"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        Public Sub TestOperationAnalyzers()
+            Dim test = <Workspace>
+                           <Project Language="C#" CommonReferences="true">
+                               <Document FilePath="Test.cs">
+                                   class Foo { void M() { int x = 0; } }
+                               </Document>
+                           </Project>
+                       </Workspace>
+
+            Using workspace = TestWorkspace.CreateWorkspace(test)
+                Dim diagnosticService = New TestDiagnosticAnalyzerService()
+                Dim incrementalAnalyzer = diagnosticService.CreateIncrementalAnalyzer(workspace)
+
+                For Each actionKind As OperationAnalyzer.ActionKind In [Enum].GetValues(GetType(OperationAnalyzer.ActionKind))
+                    Dim project = workspace.CurrentSolution.Projects.Single
+                    Dim analyzer = New OperationAnalyzer(actionKind)
+                    Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
+                    project = project.AddAnalyzerReference(analyzerReference)
+
+                    Dim descriptorsMap = diagnosticService.GetDiagnosticDescriptors(project)
+                    Assert.Equal(1, descriptorsMap.Count)
+
+                    Dim document = project.Documents.Single()
+                    Dim diagnostics = diagnosticService.GetDiagnosticsAsync(project.Solution, project.Id).WaitAndGetResult(CancellationToken.None)
+                    Assert.Equal(1, diagnostics.Count())
+                    Dim diagnostic = diagnostics.First()
+                    Assert.Equal(OperationAnalyzer.Descriptor.Id, diagnostic.Id)
+                    Dim expectedMessage = String.Format(OperationAnalyzer.Descriptor.MessageFormat.ToString(), actionKind)
+                    Assert.Equal(diagnostic.Message, expectedMessage)
+                Next actionKind
+            End Using
+        End Sub
+
+        <WpfFact, WorkItem(937939, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/937939"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestStatelessCodeBlockEndedAnalyzer()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -522,7 +554,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New CodeBlockEndedAnalyzer()
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -545,7 +577,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(937939), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(937939, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/937939"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestSameCodeBlockStartedAndEndedAnalyzer()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -555,7 +587,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New CodeBlockStartedAndEndedAnalyzer(Of Microsoft.CodeAnalysis.CSharp.SyntaxKind)
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -579,7 +611,7 @@ Namespace Microsoft.CodeAnalysis.Editor.Implementation.Diagnostics.UnitTests
             End Using
         End Sub
 
-        <WpfFact, WorkItem(1005568), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(1005568, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1005568"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestCodeBlockAnalyzerForLambda()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -631,7 +663,7 @@ class AnonymousFunctions
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New CodeBlockStartedAndEndedAnalyzer(Of Microsoft.CodeAnalysis.CSharp.SyntaxKind)
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -655,7 +687,7 @@ class AnonymousFunctions
             End Using
         End Sub
 
-        <WpfFact, WorkItem(937952), WorkItem(944832), WorkItem(1112907), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(937952, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/937952"), WorkItem(944832, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/944832"), WorkItem(1112907, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1112907"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestCompilationEndedAnalyzer()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -665,7 +697,7 @@ class AnonymousFunctions
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' turn off heuristic
@@ -698,18 +730,22 @@ class AnonymousFunctions
                 Assert.Equal(1, diagnostics.Count())
                 Assert.Equal(document.Id, diagnostics.First().DocumentId)
 
+                ' REVIEW: GetProjectDiagnosticsForIdsAsync is for project diagnostics with no location. not sure why in v1, this API returns
+                '         diagnostic with location?
+
                 ' Verify compilation diagnostics are reported with correct location info when asked for project diagnostics.
-                Dim projectDiagnostics = diagnosticService.GetProjectDiagnosticsForIdsAsync(project.Solution, project.Id).WaitAndGetResult(CancellationToken.None)
+                Dim projectDiagnostics = diagnosticService.GetDiagnosticsForIdsAsync(project.Solution, project.Id).WaitAndGetResult(CancellationToken.None)
                 Assert.Equal(2, projectDiagnostics.Count())
 
-                Dim noLocationDiagnostic = projectDiagnostics.First()
+                Dim noLocationDiagnostic = projectDiagnostics.First(Function(d) Not d.HasTextSpan)
                 Assert.Equal(CompilationEndedAnalyzer.Descriptor.Id, noLocationDiagnostic.Id)
                 Assert.Equal(False, noLocationDiagnostic.HasTextSpan)
 
-                Dim withDocumentLocationDiagnostic = projectDiagnostics.Last()
+                Dim withDocumentLocationDiagnostic = projectDiagnostics.First(Function(d) d.HasTextSpan)
                 Assert.Equal(CompilationEndedAnalyzer.Descriptor.Id, withDocumentLocationDiagnostic.Id)
                 Assert.Equal(True, withDocumentLocationDiagnostic.HasTextSpan)
                 Assert.NotNull(withDocumentLocationDiagnostic.DocumentId)
+
                 Dim diagnosticDocument = project.GetDocument(withDocumentLocationDiagnostic.DocumentId)
                 Dim tree = diagnosticDocument.GetSyntaxTreeAsync().Result
                 Dim actualLocation = withDocumentLocationDiagnostic.ToDiagnosticAsync(project, CancellationToken.None).Result.Location
@@ -718,7 +754,7 @@ class AnonymousFunctions
             End Using
         End Sub
 
-        <WpfFact, WorkItem(1083854), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <Fact, WorkItem(1083854, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1083854"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Async Function TestStatefulCompilationAnalyzer() As Task
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -728,7 +764,7 @@ class AnonymousFunctions
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New StatefulCompilationAnalyzer
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -753,7 +789,7 @@ class AnonymousFunctions
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New StatefulCompilationAnalyzer
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -775,7 +811,39 @@ class AnonymousFunctions
             End Using
         End Function
 
-        <WpfFact, WorkItem(1042914), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(9462, "https://github.com/dotnet/roslyn/issues/9462"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        Public Sub TestMultiplePartialDefinitionsInAFile()
+            Dim test = <Workspace>
+                           <Project Language="C#" CommonReferences="true">
+                               <Document FilePath="Test.cs">
+                                   partial class Foo { }
+                                   partial class Foo { }
+                               </Document>
+                           </Project>
+                       </Workspace>
+
+            Using workspace = TestWorkspace.CreateWorkspace(test)
+                Dim project = workspace.CurrentSolution.Projects.Single()
+                Dim analyzer = New NamedTypeAnalyzer
+                Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
+                project = project.AddAnalyzerReference(analyzerReference)
+                Dim diagnosticService = New TestDiagnosticAnalyzerService()
+
+                Dim incrementalAnalyzer = diagnosticService.CreateIncrementalAnalyzer(workspace)
+                Dim descriptorsMap = diagnosticService.GetDiagnosticDescriptors(project)
+                Assert.Equal(1, descriptorsMap.Count)
+
+                ' Verify no duplicate analysis/diagnostics.
+                Dim document = project.Documents.Single()
+                Dim diagnostics = diagnosticService.GetDiagnosticsAsync(project.Solution, project.Id) _
+                    .WaitAndGetResult(CancellationToken.None) _
+                    .Select(Function(d) d.Id = NamedTypeAnalyzer.DiagDescriptor.Id)
+
+                Assert.Equal(1, diagnostics.Count)
+            End Using
+        End Sub
+
+        <WpfFact, WorkItem(1042914, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1042914"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestPartialTypeInGeneratedCode()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -788,7 +856,7 @@ class AnonymousFunctions
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Test partial type diagnostic reported on user file.
@@ -811,8 +879,27 @@ class AnonymousFunctions
             End Using
         End Sub
 
-        <WpfFact, WorkItem(1042914), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        <WpfFact, WorkItem(1042914, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1042914"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
         Public Sub TestDiagnosticsReportedOnAllPartialDefinitions()
+            ' Test partial type diagnostic reported on all source files.
+            Dim analyzer = New PartialTypeDiagnosticAnalyzer(indexOfDeclToReportDiagnostic:=Nothing)
+            TestDiagnosticsReportedOnAllPartialDefinitionsCore(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
+        End Sub
+
+        <WpfFact, WorkItem(3748, "https://github.com/dotnet/roslyn/issues/3748"), Trait(Traits.Feature, Traits.Features.Diagnostics)>
+        Public Sub TestDiagnosticsReportedOnAllPartialDefinitions2()
+            ' Test partial type diagnostic reported on all source files with multiple analyzers.
+
+            ' NOTE: This test is written to guard a race condition, which originally reproed only when the driver processes 'dummyAnalyzer' before 'analyzer'.
+            ' As this is non-deterministic, we execute it within a loop to increase the chance of failure if this regresses again.
+            For i = 0 To 10
+                Dim dummyAnalyzer = New DummySymbolAnalyzer()
+                Dim analyzer = New PartialTypeDiagnosticAnalyzer(indexOfDeclToReportDiagnostic:=Nothing)
+                TestDiagnosticsReportedOnAllPartialDefinitionsCore(ImmutableArray.Create(Of DiagnosticAnalyzer)(dummyAnalyzer, analyzer))
+            Next i
+        End Sub
+
+        Private Shared Sub TestDiagnosticsReportedOnAllPartialDefinitionsCore(analyzers As ImmutableArray(Of DiagnosticAnalyzer))
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
                                <Document FilePath="Test1.cs">
@@ -824,12 +911,11 @@ class AnonymousFunctions
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Test partial type diagnostic reported on all source files.
-                Dim analyzer = New PartialTypeDiagnosticAnalyzer(indexOfDeclToReportDiagnostic:=Nothing)
-                Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
+                Dim analyzerReference = New AnalyzerImageReference(analyzers)
                 project = project.AddAnalyzerReference(analyzerReference)
 
                 Dim diagnosticService = New TestDiagnosticAnalyzerService()
@@ -847,7 +933,7 @@ class AnonymousFunctions
                     Dim document = project.GetDocument(diagnostic.DocumentId)
                     If document.Name = "Test1.cs" Then
                         file1HasDiag = True
-                    ElseIf document.Name = "Test2.cs"
+                    ElseIf document.Name = "Test2.cs" Then
                         file2HasDiag = True
                     End If
                 Next
@@ -857,7 +943,7 @@ class AnonymousFunctions
             End Using
         End Sub
 
-        <WpfFact, WorkItem(1067286)>
+        <WpfFact, WorkItem(1067286, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1067286")>
         Private Sub TestCodeBlockAnalyzersForExpressionBody()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -872,7 +958,7 @@ public class B
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Test code block analyzer
@@ -898,7 +984,7 @@ public class B
             End Using
         End Sub
 
-        <WpfFact, WorkItem(592)>
+        <WpfFact, WorkItem(592, "https://github.com/dotnet/roslyn/issues/592")>
         Private Sub TestSyntaxNodeAnalyzersForExpressionBody()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -913,7 +999,7 @@ public class B
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Test syntax node analyzer
@@ -939,7 +1025,7 @@ public class B
             End Using
         End Sub
 
-        <WpfFact, WorkItem(592)>
+        <WpfFact, WorkItem(592, "https://github.com/dotnet/roslyn/issues/592")>
         Private Sub TestMethodSymbolAnalyzersForExpressionBody()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -954,7 +1040,7 @@ public class B
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Test method symbol analyzer
@@ -984,7 +1070,7 @@ public class B
             End Using
         End Sub
 
-        <WpfFact, WorkItem(1109105)>
+        <WpfFact, WorkItem(1109105, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1109105")>
         Public Sub TestMethodSymbolAnalyzer_MustOverrideMethod()
             Dim test = <Workspace>
                            <Project Language="Visual Basic" CommonReferences="true">
@@ -1006,7 +1092,7 @@ End Class
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New MustOverrideMethodAnalyzer()
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -1051,7 +1137,7 @@ End Class
             End Sub
         End Class
 
-        <WpfFact, WorkItem(565)>
+        <WpfFact, WorkItem(565, "https://github.com/dotnet/roslyn/issues/565")>
         Public Sub TestFieldDeclarationAnalyzer()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -1067,7 +1153,7 @@ public class B
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
                 Dim analyzer = New FieldDeclarationAnalyzer()
                 Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
@@ -1117,7 +1203,7 @@ public class B
             End Sub
         End Class
 
-        <WpfFact, WorkItem(530)>
+        <WpfFact, WorkItem(530, "https://github.com/dotnet/roslyn/issues/530")>
         Public Sub TestCompilationAnalyzerWithAnalyzerOptions()
             Dim test = <Workspace>
                            <Project Language="C#" CommonReferences="true">
@@ -1129,7 +1215,7 @@ public class B
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Add analyzer
@@ -1299,6 +1385,48 @@ public class B
                     index += 1
                 Next
 
+            End Sub
+        End Class
+
+        Private Class NamedTypeAnalyzer
+            Inherits DiagnosticAnalyzer
+
+            Public Shared ReadOnly DiagDescriptor As DiagnosticDescriptor = DescriptorFactory.CreateSimpleDescriptor("DummyDiagnostic")
+            Public Overrides ReadOnly Property SupportedDiagnostics As ImmutableArray(Of DiagnosticDescriptor)
+                Get
+                    Return ImmutableArray.Create(DiagDescriptor)
+                End Get
+            End Property
+
+            Public Overrides Sub Initialize(context As AnalysisContext)
+                context.RegisterCompilationStartAction(Sub(compStartContext As CompilationStartAnalysisContext)
+                                                           Dim symbols = New HashSet(Of ISymbol)
+                                                           compStartContext.RegisterSymbolAction(Sub(sc As SymbolAnalysisContext)
+                                                                                                     If (symbols.Contains(sc.Symbol)) Then
+                                                                                                         Throw New Exception("Duplicate symbol callback")
+                                                                                                     End If
+                                                                                                     sc.ReportDiagnostic(Diagnostic.Create(DiagDescriptor, sc.Symbol.Locations.First()))
+                                                                                                 End Sub, SymbolKind.NamedType)
+                                                       End Sub)
+            End Sub
+        End Class
+
+        Private Class DummySymbolAnalyzer
+            Inherits DiagnosticAnalyzer
+
+            Public Shared ReadOnly DiagDescriptor As DiagnosticDescriptor = DescriptorFactory.CreateSimpleDescriptor("DummyDiagnostic")
+
+            Public Overrides ReadOnly Property SupportedDiagnostics As ImmutableArray(Of DiagnosticDescriptor)
+                Get
+                    Return ImmutableArray.Create(DiagDescriptor)
+                End Get
+            End Property
+
+            Public Overrides Sub Initialize(context As AnalysisContext)
+                context.RegisterSymbolAction(AddressOf AnalyzeSymbol, SymbolKind.NamedType)
+            End Sub
+
+            Private Sub AnalyzeSymbol(context As SymbolAnalysisContext)
             End Sub
         End Class
 
@@ -1625,7 +1753,7 @@ End Class
         End Sub
 
         Private Sub TestCodeBlockActionCore(test As XElement, Optional onlyStatelessAction As Boolean = False)
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Add analyzer
@@ -1685,7 +1813,7 @@ namespace ConsoleApplication1
         End Sub
 
         Private Sub TestGenericNameCore(test As XElement, expectedMessage As String, expectedId As String, ParamArray analyzers As DiagnosticAnalyzer())
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Add analyzer
@@ -1751,7 +1879,7 @@ class MyClass
                        </Workspace>
 
             ' Ensure that adding a dummy analyzer with no supported diagnostics doesn't bring down entire analysis.
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Add analyzer
@@ -1788,7 +1916,7 @@ class MyClass
                            </Project>
                        </Workspace>
 
-            Using workspace = TestWorkspaceFactory.CreateWorkspace(test)
+            Using workspace = TestWorkspace.CreateWorkspace(test)
                 Dim project = workspace.CurrentSolution.Projects.Single()
 
                 ' Add analyzer
@@ -1814,6 +1942,41 @@ class MyClass
 
                 Assert.Equal(1, diagnostics.Count())
                 Assert.Equal(HiddenDiagnosticsCompilationAnalyzer.Descriptor.Id, diagnostics.Single().Id)
+            End Using
+        End Sub
+
+        <WpfFact>
+        Public Sub TestEnsureNoMergedNamespaceSymbolAnalyzer()
+            Dim test = <Workspace>
+                           <Project Language="C#" AssemblyName="BaseAssembly" CommonReferences="true">
+                               <Document>
+                                   namespace N1.N2 { class C1 { } }
+                               </Document>
+                           </Project>
+                           <Project Language="C#" AssemblyName="MainAssembly" CommonReferences="true">
+                               <ProjectReference>BaseAssembly</ProjectReference>
+                               <Document>
+                                   namespace N1.N2 { class C2 { } }
+                               </Document>
+                           </Project>
+                       </Workspace>
+
+            Using workspace = TestWorkspace.CreateWorkspace(test)
+                Dim project = workspace.CurrentSolution.Projects.Single(Function(p As Project) p.Name = "MainAssembly")
+
+                ' Analyzer reports a diagnostic if it receives a merged namespace symbol across assemblies in compilation.
+                Dim analyzer = New EnsureNoMergedNamespaceSymbolAnalyzer()
+                Dim analyzerReference = New AnalyzerImageReference(ImmutableArray.Create(Of DiagnosticAnalyzer)(analyzer))
+                project = project.AddAnalyzerReference(analyzerReference)
+
+                Dim diagnosticService = New TestDiagnosticAnalyzerService()
+
+                Dim descriptorsMap = diagnosticService.GetDiagnosticDescriptors(project)
+                Assert.Equal(1, descriptorsMap.Count)
+
+                Dim incrementalAnalyzer = diagnosticService.CreateIncrementalAnalyzer(workspace)
+                Dim diagnostics = diagnosticService.GetDiagnosticsAsync(project.Solution, project.Id).WaitAndGetResult(CancellationToken.None)
+                Assert.Equal(0, diagnostics.Count())
             End Using
         End Sub
     End Class

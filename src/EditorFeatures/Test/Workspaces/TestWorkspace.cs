@@ -21,7 +21,7 @@ using Roslyn.Test.Utilities;
 
 namespace Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
 {
-    public class TestWorkspace : Workspace
+    public partial class TestWorkspace : Workspace
     {
         public const string WorkspaceName = "Test";
 
@@ -148,7 +148,7 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
             }
             else if (exceptions.Count > 1)
             {
-				throw new AggregateException(exceptions);
+                throw new AggregateException(exceptions);
             }
 
             if (SynchronizationContext.Current != null)
@@ -204,9 +204,9 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
             base.OnProjectReferenceRemoved(projectId, projectReference);
         }
 
-        public new Task OnDocumentOpenedAsync(DocumentId documentId, SourceTextContainer textContainer, bool isCurrentContext = true)
+        public new void OnDocumentOpened(DocumentId documentId, SourceTextContainer textContainer, bool isCurrentContext = true)
         {
-            return base.OnDocumentOpenedAsync(documentId, textContainer, isCurrentContext);
+            base.OnDocumentOpened(documentId, textContainer, isCurrentContext);
         }
 
         public void OnDocumentClosed(DocumentId documentId)

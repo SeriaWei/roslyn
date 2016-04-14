@@ -8,14 +8,14 @@ Imports Microsoft.CodeAnalysis.VisualBasic.CodeFixes.Spellcheck
 Imports Microsoft.CodeAnalysis.VisualBasic.Diagnostics
 
 Namespace Microsoft.CodeAnalysis.Editor.VisualBasic.UnitTests.Diagnostics.Spellcheck
-    Public Class SpellcheckTests
+    Public Class SpellCheckTests
         Inherits AbstractVisualBasicDiagnosticProviderBasedUserDiagnosticTest
 
         Friend Overrides Function CreateDiagnosticProviderAndFixer(workspace As Workspace) As Tuple(Of DiagnosticAnalyzer, CodeFixProvider)
-            Return Tuple.Create(Of DiagnosticAnalyzer, CodeFixProvider)(Nothing, New SpellCheckCodeFixProvider())
+            Return Tuple.Create(Of DiagnosticAnalyzer, CodeFixProvider)(Nothing, New VisualBasicSpellCheckCodeFixProvider())
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestNoSpellcheckForIfOnly2Characters() As Task
             Dim text = <File>Class Foo
     Sub Bar()
@@ -25,7 +25,7 @@ End Class</File>
             Await TestMissingAsync(text)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestAfterNewExpression() As Task
             Dim text = <File>Class Foo
     Sub Bar()
@@ -35,7 +35,7 @@ End Class</File>
             Await TestExactActionSetOfferedAsync(text.NormalizedValue, {String.Format(FeaturesResources.ChangeTo, "Fooa", "Foo")})
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestInAsClause() As Task
             Dim text = <File>Class Foo
     Sub Bar()
@@ -46,7 +46,7 @@ End Class</File>
                 {String.Format(FeaturesResources.ChangeTo, "Foa", "Foo")})
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestInSimpleAsClause() As Task
             Dim text = <File>Class Foo
     Sub Bar()
@@ -57,7 +57,7 @@ End Class</File>
                 {String.Format(FeaturesResources.ChangeTo, "Foa", "Foo")})
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestInFunc() As Task
             Dim text = <File>Class Foo
     Sub Bar(a as Func(Of [|Foa|]))
@@ -67,7 +67,7 @@ End Class</File>
                 {String.Format(FeaturesResources.ChangeTo, "Foa", "Foo")})
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestCorrectIdentifier() As Task
             Dim text = <File>Module Program
     Sub Main(args As String())
@@ -79,7 +79,7 @@ End Module</File>
         End Function
 
         <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
-        <WorkItem(1065708)>
+        <WorkItem(1065708, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1065708")>
         Public Async Function TestInTypeOfIsExpression() As Task
             Dim text = <File>Imports System
 Public Class Class1
@@ -92,7 +92,7 @@ End Class</File>
         End Function
 
         <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
-        <WorkItem(1065708)>
+        <WorkItem(1065708, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/1065708")>
         Public Async Function TestInTypeOfIsNotExpression() As Task
             Dim text = <File>Imports System
 Public Class Class1
@@ -104,7 +104,7 @@ End Class</File>
             Await TestExactActionSetOfferedAsync(text.NormalizedValue, {String.Format(FeaturesResources.ChangeTo, "Boolea", "Boolean")})
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestInvokeCorrectIdentifier() As Task
             Dim text = <File>Module Program
     Sub Main(args As String())
@@ -123,7 +123,7 @@ End Module</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestAfterDot() As Task
             Dim text = <File>Module Program
     Sub Main(args As String())
@@ -140,7 +140,7 @@ End Module</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestNotInaccessibleProperty() As Task
             Dim text = <File>Module Program
     Sub Main(args As String())
@@ -159,7 +159,7 @@ End Class</File>
             Await TestMissingAsync(text)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestGenericName1() As Task
             Dim text = <File>Class Foo(Of T)
     Dim x As [|Foo2(Of T)|]
@@ -172,7 +172,7 @@ End Class</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestGenericName2() As Task
             Dim text = <File>Class Foo(Of T)
     Dim x As [|Foo2|]
@@ -185,7 +185,7 @@ End Class</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestQualifiedName1() As Task
             Dim text = <File>Module Program
     Dim x As New [|Foo2.Bar|]
@@ -210,7 +210,7 @@ End Class</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestQualifiedName2() As Task
             Dim text = <File>Module Program
     Dim x As New [|Foo.Ba2|]
@@ -235,7 +235,7 @@ End Class</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestMiddleOfDottedExpression() As Task
             Dim text = <File>Module Program
     Sub Main(args As String())
@@ -268,8 +268,8 @@ End Class</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WorkItem(547161)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <WorkItem(547161, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/547161")>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestNotForOverloadResolutionFailure() As Task
             Dim text = <File>Module Program
     Sub Main(args As String())
@@ -287,8 +287,8 @@ End Module</File>
             Await TestMissingAsync(text)
         End Function
 
-        <WorkItem(547169)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <WorkItem(547169, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/547169")>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestHandlePredefinedTypeKeywordCorrectly() As Task
             Dim text = <File>
 Imports System
@@ -312,12 +312,12 @@ Module Program
     End Sub
 End Module</File>
 
-            Await TestActionCountAsync(text.ConvertTestSourceTag(), 3)
+            Await TestActionCountAsync(text.ConvertTestSourceTag(), 2)
             Await TestAsync(text, expected, index:=0)
         End Function
 
-        <WorkItem(547166)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <WorkItem(547166, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/547166")>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestKeepEscapedIdentifiersEscaped() As Task
             Dim text = <File>
 Module Program
@@ -344,8 +344,8 @@ End Module</File>
             Await TestAsync(text, expected)
         End Function
 
-        <WorkItem(547166)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <WorkItem(547166, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/547166")>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestNoDuplicateCorrections() As Task
             Dim text = <File>
 Module Program
@@ -424,8 +424,8 @@ End Module</File>
             Await TestAsync(text, expected1, index:=1)
         End Function
 
-        <WorkItem(775448)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
+        <WorkItem(775448, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/775448")>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsSpellcheck)>
         Public Async Function TestShouldTriggerOnBC32045() As Task
             ' BC32045: 'A' has no type parameters and so cannot have type arguments.
 
@@ -433,7 +433,7 @@ End Module</File>
 ' Import System.Collections to ensure we get BC32045
 Imports System.Collections
 
-Interface IOrderable(Of T)
+Interface Enumerable(Of T)
 End Interface
 
 Class C
@@ -446,12 +446,12 @@ End Class</File>
 ' Import System.Collections to ensure we get BC32045
 Imports System.Collections
 
-Interface IOrderable(Of T)
+Interface Enumerable(Of T)
 End Interface
 
 Class C
     Sub Main(args As String())
-        Dim x as IOrderable(Of Integer)
+        Dim x as Enumerable(Of Integer)
     End Sub
 End Class</File>
 
@@ -459,8 +459,8 @@ End Class</File>
             Await TestAsync(text, expected, index:=0)
         End Function
 
-        <WorkItem(908322)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsAddImport)>
+        <WorkItem(908322, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/908322")>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsAddImport)>
         Public Async Function TestTestObjectConstruction() As Task
             Await TestAsync(
 NewLines("Class AwesomeClass \n Sub M() \n Dim foo = New [|AwesomeClas()|] \n End Sub \n End Class"),
@@ -469,7 +469,7 @@ index:=0)
         End Function
 
         <WorkItem(6338, "https://github.com/dotnet/roslyn/issues/6338")>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsAddImport)>
+        <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsAddImport)>
         Public Async Function TestTestMissingName() As Task
             Await TestMissingAsync(
 NewLines("<Assembly: Microsoft.CodeAnalysis.[||]>"))
@@ -481,11 +481,11 @@ NewLines("<Assembly: Microsoft.CodeAnalysis.[||]>"))
             Friend Overrides Function CreateDiagnosticProviderAndFixer(workspace As Workspace) As Tuple(Of DiagnosticAnalyzer, CodeFixProvider)
                 Return Tuple.Create(Of DiagnosticAnalyzer, CodeFixProvider)(
                     New VisualBasicUnboundIdentifiersDiagnosticAnalyzer(),
-                    New SpellCheckCodeFixProvider())
+                    New VisualBasicSpellCheckCodeFixProvider())
             End Function
 
-            <WorkItem(829970)>
-            <WpfFact, Trait(Traits.Feature, Traits.Features.CodeActionsAddImport)>
+            <WorkItem(829970, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/829970")>
+            <Fact, Trait(Traits.Feature, Traits.Features.CodeActionsAddImport)>
             Public Async Function TestIncompleteStatement() As Task
                 Await TestAsync(
 NewLines("Class AwesomeClass \n Inherits System.Attribute \n End Class \n Module Program \n <[|AwesomeClas|]> \n End Module"),

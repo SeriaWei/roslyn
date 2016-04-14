@@ -22,8 +22,8 @@ namespace Microsoft.VisualStudio.InteractiveWindow.UnitTests
             Window.InsertCode("1 + 2");
             Window.Operations.SelectAll();
             Window.Operations.Copy();
-            VerifyClipboardData("1 + 2", 
-                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 1 + 2}", 
+            VerifyClipboardData("1 + 2",
+                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 1 + 2}",
                 "[{\"content\":\"1 + 2\",\"kind\":2}]");
 
             // Shrink the selection.
@@ -218,7 +218,7 @@ System.Console.WriteLine(o);",
             // > 222|
             Window.Operations.SelectAll();
             Window.Operations.Cut();
-            
+
             Assert.Equal("> ", GetTextFromCurrentSnapshot());
             Assert.True(Window.TextView.Selection.IsEmpty);
 
@@ -257,7 +257,7 @@ System.Console.WriteLine();",
             Window.Operations.Cut();
 
             // expect nothing got deleted
-            Assert.Equal("> foreach (var o in new[] { 1, 2, 3 })\r\n> System.Console.WriteLine();\r\n1\r\n2\r\n3\r\n> 1 + 2", 
+            Assert.Equal("> foreach (var o in new[] { 1, 2, 3 })\r\n> System.Console.WriteLine();\r\n1\r\n2\r\n3\r\n> 1 + 2",
                 GetTextFromCurrentSnapshot());
             Assert.False(Window.TextView.Selection.IsEmpty);
 
@@ -404,7 +404,7 @@ System.Console.WriteLine();",
             Window.InsertCode("1 + 2");
 
             // readonly buffer
-            CopyNoSelectionAndVerify(0, 7, "> s +\r\n", 
+            CopyNoSelectionAndVerify(0, 7, "> s +\r\n",
                 "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 > s +\\par }",
                 "[{\"content\":\"> \",\"kind\":0},{\"content\":\"s +\\u000d\\u000a\",\"kind\":2}]");
             CopyNoSelectionAndVerify(7, 11, "> \r\n",
@@ -1093,7 +1093,7 @@ System.Console.WriteLine();",
         {
             var caret = Window.TextView.Caret;
             var selection = Window.TextView.Selection;
-            
+
             Window.InsertCode("111");
             Window.Operations.BreakLine();
             Window.InsertCode("222");
@@ -1267,7 +1267,7 @@ System.Console.WriteLine();",
         {
             var caret = Window.TextView.Caret;
             var selection = Window.TextView.Selection;
-            
+
             Window.InsertCode("111");
             Window.Operations.BreakLine();
             Window.InsertCode("222");
@@ -1455,6 +1455,163 @@ System.Console.WriteLine();",
             Assert.Equal("> ", GetTextFromCurrentSnapshot());
         }
 
+        [WpfFact]
+        public async Task CopyInputsFromCurrentLine()
+        {
+            _testClipboard.Clear();
+
+            Window.InsertCode("111");
+            Window.Operations.BreakLine();
+            Window.InsertCode("222");
+
+            Window.Operations.CopyCode();
+            VerifyClipboardData("222",
+                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 222}",
+                "[{\"content\":\"222\",\"kind\":2}]",
+                expectedToBeLineCopy: true);
+
+
+            // Move caret to:
+            // > 1|11
+            // > 222
+            MoveCaretToPreviousPosition(7);
+            Window.Operations.CopyCode();
+            VerifyClipboardData("111\r\n",
+                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 111\\par }",
+                "[{\"content\":\"111\\u000d\\u000a\",\"kind\":2}]",
+                expectedToBeLineCopy: true);
+
+            _testClipboard.Clear();
+            Window.Operations.ClearView();
+
+            await Submit(
+@"111",
+@"111
+").ConfigureAwait(true);
+
+            Window.InsertCode("222");
+
+            // Move caret to:
+            // > 111
+            // 1|11
+            // > 222
+            MoveCaretToPreviousPosition(7);
+            Window.Operations.CopyCode();
+            VerifyClipboardData(null, null, null);
+        }
+
+        [WpfFact]
+        public async Task CopyInputsFromSelection()
+        {
+            _testClipboard.Clear();
+
+            await Submit(
+@"111",
+@"111
+").ConfigureAwait(true);
+            Window.InsertCode("222");
+
+            // Make following stream selection:
+            // |> 111
+            // 111
+            // > 222|
+            Window.Operations.SelectAll();
+            Window.Operations.SelectAll();
+            Window.Operations.CopyCode();
+            VerifyClipboardData("111\r\n222",
+                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 111\\par 222}",
+                "[{\"content\":\"111\\u000d\\u000a\",\"kind\":2},{\"content\":\"222\",\"kind\":2}]");
+
+
+            _testClipboard.Clear();
+            Window.Operations.ClearView();
+
+            Window.InsertCode("111");
+            Window.Operations.BreakLine();
+            Window.InsertCode("222");
+
+            // Make a selection as follows:
+            // |> 111
+            // > 222|
+            Window.Operations.SelectAll();
+            Window.Operations.SelectAll();
+            Window.Operations.CopyCode();
+
+            VerifyClipboardData("111\r\n222",
+                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 111\\par 222}",
+                "[{\"content\":\"111\\u000d\\u000a\",\"kind\":2},{\"content\":\"222\",\"kind\":2}]");
+
+            _testClipboard.Clear();
+            Window.TextView.Selection.Clear();
+
+            var caret = Window.TextView.Caret;
+            // Make a box selection as follows:
+            // |> 1|11
+            // |111|
+            // |> 2|22
+            MoveCaretToPreviousPosition(2);
+            var selection = Window.TextView.Selection;
+            var anchor = caret.Position.VirtualBufferPosition;
+            MoveCaretToPreviousPosition(13);
+            var active = caret.Position.VirtualBufferPosition;
+            selection.Mode = Text.Editor.TextSelectionMode.Box;
+            selection.Select(anchor, active);
+            Window.Operations.CopyCode();
+
+            VerifyClipboardData("1\r\n2\r\n",
+                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 1\\par 2}",
+                "[{\"content\":\"1\",\"kind\":2},{\"content\":\"\\u000d\\u000a\",\"kind\":4},{\"content\":\"2\",\"kind\":2},{\"content\":\"\\u000d\\u000a\",\"kind\":4}]",
+                 expectedToBeBoxCopy: true);
+
+            _testClipboard.Clear();
+            Window.Operations.ClearView();
+
+            await Submit(
+@"111",
+@"111
+").ConfigureAwait(true);
+            Window.InsertCode("222");
+
+            // Make a stream selection as follows:
+            // > 111
+            // 1|11
+            // > 22|2
+            MoveCaretToPreviousPosition(1);
+            anchor = caret.Position.VirtualBufferPosition;
+            MoveCaretToPreviousPosition(7);
+            active = caret.Position.VirtualBufferPosition;
+            selection.Mode = Text.Editor.TextSelectionMode.Stream;
+            selection.Select(anchor, active);
+            Window.Operations.CopyCode();
+
+            VerifyClipboardData("22",
+                "{\\rtf\\ansi{\\fonttbl{\\f0 Consolas;}}{\\colortbl;\\red0\\green0\\blue0;\\red255\\green255\\blue255;}\\f0 \\fs24 \\cf1 \\cb2 \\highlight2 22}",
+                "[{\"content\":\"22\",\"kind\":2}]");
+
+            _testClipboard.Clear();
+            Window.Operations.ClearView();
+
+            await Submit(
+@"111",
+@"111
+").ConfigureAwait(true);
+            Window.InsertCode("222");
+
+            // Make a stream selection as follows:
+            // > 111
+            // 1|11|
+            // > 222
+            MoveCaretToPreviousPosition(6);
+            anchor = caret.Position.VirtualBufferPosition;
+            MoveCaretToPreviousPosition(2);
+            active = caret.Position.VirtualBufferPosition;
+            selection.Mode = Text.Editor.TextSelectionMode.Stream;
+            selection.Select(anchor, active);
+            Window.Operations.CopyCode();
+
+            VerifyClipboardData(null, null, null);
+        }
+
         /// <summary>
         /// Put text equivalent to copying from following selection to clipboard:
         /// |> TextCopiedFromStreamSelection| 
@@ -1466,7 +1623,7 @@ System.Console.WriteLine();",
                 new BufferBlock(ReplSpanKind.Prompt, "> "),
                 new BufferBlock(ReplSpanKind.Input, "TextCopiedFromStreamSelection"),
             };
-            
+
             CopyToClipboard(blocks, includeRepl: true);
         }
 
@@ -1557,8 +1714,8 @@ System.Console.WriteLine();",
                 Assert.Equal(expectedRtf, actualRtf);
             }
 
-            Assert.Equal(expectedToBeLineCopy, data.GetDataPresent(InteractiveWindow.ClipboardLineBasedCutCopyTag));
-            Assert.Equal(expectedToBeBoxCopy, data.GetDataPresent(InteractiveWindow.BoxSelectionCutCopyTag));
+            Assert.Equal(expectedToBeLineCopy, data?.GetDataPresent(InteractiveWindow.ClipboardLineBasedCutCopyTag) ?? false);
+            Assert.Equal(expectedToBeBoxCopy, data?.GetDataPresent(InteractiveWindow.BoxSelectionCutCopyTag) ?? false);
             Assert.False(expectedToBeLineCopy && expectedToBeBoxCopy);
         }
 
@@ -1578,7 +1735,7 @@ System.Console.WriteLine();",
         private void MoveCaretToPreviousPosition(int moves = 1)
         {
             var caret = Window.TextView.Caret;
-            for (int i = 0; i< moves; ++i)
+            for (int i = 0; i < moves; ++i)
             {
                 caret.MoveToPreviousCaretPosition();
             }

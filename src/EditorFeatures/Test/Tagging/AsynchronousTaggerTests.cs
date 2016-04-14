@@ -31,10 +31,10 @@ namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.Tagging
         /// I'm leaving this test here because it covers that code path (as shown by code coverage)
         /// </summary>
         [WpfFact]
-        [WorkItem(530368)]
+        [WorkItem(530368, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/530368")]
         public async Task LargeNumberOfSpans()
         {
-            using (var workspace = await CSharpWorkspaceFactory.CreateWorkspaceFromFileAsync(@"class Program
+            using (var workspace = await TestWorkspace.CreateCSharpAsync(@"class Program
 {
     void M()
     {
@@ -57,6 +57,8 @@ namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.Tagging
                         return new List<ITagSpan<TestTag>>() { new TagSpan<TestTag>(span, new TestTag()) };
                     };
                 var asyncListener = new TaggerOperationListener();
+
+                WpfTestCase.RequireWpfFact($"{nameof(AsynchronousTaggerTests)}.{nameof(LargeNumberOfSpans)} creates asynchronous taggers");
 
                 var notificationService = workspace.GetService<IForegroundNotificationService>();
 
@@ -92,8 +94,10 @@ namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.Tagging
         [WpfFact]
         public async Task TestSynchronousOutlining()
         {
-            using (var workspace = await CSharpWorkspaceFactory.CreateWorkspaceFromFileAsync("class Program {\r\n\r\n}"))
+            using (var workspace = await TestWorkspace.CreateCSharpAsync("class Program {\r\n\r\n}"))
             {
+                WpfTestCase.RequireWpfFact($"{nameof(AsynchronousTaggerTests)}.{nameof(TestSynchronousOutlining)} creates asynchronous taggers");
+
                 var tagProvider = new OutliningTaggerProvider(
                     workspace.GetService<IForegroundNotificationService>(),
                     workspace.GetService<ITextEditorFactoryService>(),

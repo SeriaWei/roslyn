@@ -433,6 +433,16 @@ namespace Microsoft.CodeAnalysis {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exception occurred with following context:
+        ///{0}.
+        /// </summary>
+        internal static string ExceptionContext {
+            get {
+                return ResourceManager.GetString("ExceptionContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Expected non-empty public key.
         /// </summary>
         internal static string ExpectedNonEmptyPublicKey {
@@ -609,6 +619,15 @@ namespace Microsoft.CodeAnalysis {
         internal static string InvalidDiagnosticIdReported {
             get {
                 return ResourceManager.GetString("InvalidDiagnosticIdReported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reported diagnostic &apos;{0}&apos; has a source location in file &apos;{1}&apos;, which is not part of the compilation being analyzed..
+        /// </summary>
+        internal static string InvalidDiagnosticLocationReported {
+            get {
+                return ResourceManager.GetString("InvalidDiagnosticLocationReported", resourceCulture);
             }
         }
         
@@ -1036,6 +1055,15 @@ namespace Microsoft.CodeAnalysis {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Value for argument &apos;/shared:&apos; must not be empty.
+        /// </summary>
+        internal static string SharedArgumentMissing {
+            get {
+                return ResourceManager.GetString("SharedArgumentMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Size has to be positive..
         /// </summary>
         internal static string SizeHasToBePositive {
@@ -1045,7 +1073,7 @@ namespace Microsoft.CodeAnalysis {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Then span does not include the end of a line..
+        ///   Looks up a localized string similar to The span does not include the end of a line..
         /// </summary>
         internal static string SpanDoesNotIncludeEndOfLine {
             get {
@@ -1099,7 +1127,16 @@ namespace Microsoft.CodeAnalysis {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SymWriter doesn&apos;t support deterministic compilation.
+        ///   Looks up a localized string similar to Windows PDB writer is not available -- could not find Microsoft.DiaSymReader.Native.{0}.dll.
+        /// </summary>
+        internal static string SymWriterNotAvailable {
+            get {
+                return ResourceManager.GetString("SymWriterNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows PDB writer doesn&apos;t support deterministic compilation -- could not find Microsoft.DiaSymReader.Native.{0}.dll.
         /// </summary>
         internal static string SymWriterNotDeterministic {
             get {

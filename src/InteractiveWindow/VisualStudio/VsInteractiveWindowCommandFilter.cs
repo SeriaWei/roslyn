@@ -215,6 +215,22 @@ namespace Microsoft.VisualStudio.InteractiveWindow.Shell
             {
                 switch ((VSConstants.VSStd2KCmdID)nCmdID)
                 {
+                    case VSConstants.VSStd2KCmdID.TYPECHAR:
+                        {
+                            var operations = _window.Operations as IInteractiveWindowOperations2;
+                            if (operations != null)
+                            {
+                                char typedChar = (char)(ushort)System.Runtime.InteropServices.Marshal.GetObjectForNativeVariant(pvaIn);
+                                operations.TypeChar(typedChar);
+                                return VSConstants.S_OK;
+                            }
+                            else
+                            {
+                                _window.Operations.Delete();
+                            }
+                            break;
+                        }
+
                     case VSConstants.VSStd2KCmdID.RETURN:
                         if (_window.Operations.Return())
                         {
@@ -358,6 +374,9 @@ namespace Microsoft.VisualStudio.InteractiveWindow.Shell
                         prgCmds[0].cmdf = !_window.IsResetting ? CommandEnabled : CommandDisabled;
                         prgCmds[0].cmdf |= (uint)OLECMDF.OLECMDF_DEFHIDEONCTXTMENU;
                         return VSConstants.S_OK;
+                    case CommandIds.CopyCode:
+                        prgCmds[0].cmdf = _window.Operations is IInteractiveWindowOperations2 ? CommandEnabled : CommandDisabled;
+                        return VSConstants.S_OK;
                     default:
                         prgCmds[0].cmdf = CommandEnabled;
                         break;
@@ -404,6 +423,15 @@ namespace Microsoft.VisualStudio.InteractiveWindow.Shell
                     case CommandIds.HistoryNext: _window.Operations.HistoryNext(); return VSConstants.S_OK;
                     case CommandIds.HistoryPrevious: _window.Operations.HistoryPrevious(); return VSConstants.S_OK;
                     case CommandIds.ClearScreen: _window.Operations.ClearView(); return VSConstants.S_OK;
+                    case CommandIds.CopyCode:
+                        {
+                            var operation = _window.Operations as IInteractiveWindowOperations2;
+                            if (operation != null)
+                            {
+                                operation.CopyCode();
+                            }
+                            return VSConstants.S_OK;
+                        }
                     case CommandIds.SearchHistoryNext:
                         _window.Operations.HistorySearchNext();
                         return VSConstants.S_OK;
@@ -416,19 +444,6 @@ namespace Microsoft.VisualStudio.InteractiveWindow.Shell
             {
                 switch ((VSConstants.VSStd2KCmdID)nCmdID)
                 {
-                    case VSConstants.VSStd2KCmdID.TYPECHAR:
-                        {
-                            var operations = _window.Operations as IInteractiveWindowOperations2;
-                            if (operations != null)
-                            {
-                                char typedChar = (char)(ushort)System.Runtime.InteropServices.Marshal.GetObjectForNativeVariant(pvaIn);
-                                operations.TypeChar(typedChar);
-                                return VSConstants.S_OK;
-                            }
-                            _window.Operations.Delete();
-                            break;
-                        }
-
                     case VSConstants.VSStd2KCmdID.RETURN:
                         if (_window.Operations.TrySubmitStandardInput())
                         {

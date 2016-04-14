@@ -20,7 +20,8 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleToTest Include="Roslyn.InteractiveWindow.UnitTests" />
-    <InternalsVisibleToTest Include="Roslyn.Services.Editor.UnitTests2"/>
+    <InternalsVisibleToTest Include="Roslyn.Services.Editor.UnitTests2" />
+    <InternalsVisibleToTest Include="Roslyn.VisualStudio.CSharp.UnitTests" />
     <InternalsVisibleTo Include="Microsoft.VisualStudio.InteractiveServices" />
     <InternalsVisibleTo Include="Microsoft.VisualStudio.VsInteractiveWindow" />
     <InternalsVisibleTo Include="Microsoft.CodeAnalysis.EditorFeatures" />
@@ -43,6 +44,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Text.Internal, Version=$(VisualStudioReferenceAssemblyVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>False</Private>
+      <HintPath>$(DevEnvDir)\PrivateAssemblies\Microsoft.VisualStudio.Text.Internal.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Text.Logic, Version=$(VisualStudioReferenceAssemblyVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>false</Private>
@@ -124,6 +126,7 @@
     <Compile Include="SmartIndent\InteractiveSmartIndenterProvider.cs" />
     <Compile Include="SmartUpDownOption.cs" />
     <Compile Include="SubmissionBufferAddedEventArgs.cs" />
+    <Compile Include="TextTransactionMergePolicy.cs" />
     <Compile Include="Utils\Contract.cs" />
     <Compile Include="Utils\EditorExtensions.cs" />
     <Compile Include="..\..\Compilers\Core\Portable\InternalUtilities\ExceptionUtilities.cs">
@@ -137,6 +140,7 @@
     <EmbeddedResource Include="InteractiveWindowResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>InteractiveWindowResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -1,8 +1,11 @@
-﻿Imports System.Threading
+﻿' Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+
+Imports System.Threading
 Imports System.Threading.Tasks
 Imports Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
 Imports Microsoft.CodeAnalysis.FindSymbols
 Imports Microsoft.VisualStudio.LanguageServices.Implementation.Library
+Imports Microsoft.VisualStudio.LanguageServices.UnitTests.Utilities.VsNavInfo
 Imports Microsoft.VisualStudio.Shell.Interop
 Imports Roslyn.Test.Utilities
 
@@ -11,7 +14,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
 
 #Region "C# Tests"
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestNamespace() As Task
             Dim workspace =
 <Workspace>
@@ -33,7 +36,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestClass() As Task
             Dim workspace =
 <Workspace>
@@ -60,7 +63,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMethod() As Task
             Dim workspace =
 <Workspace>
@@ -92,7 +95,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMethod_Parameters() As Task
             Dim workspace =
 <Workspace>
@@ -127,7 +130,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMetadata_Class1() As Task
             Dim workspace =
 <Workspace>
@@ -155,7 +158,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMetadata_Class2() As Task
             Dim workspace =
 <Workspace>
@@ -184,7 +187,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMetadata_Ctor1() As Task
             Dim workspace =
 <Workspace>
@@ -215,7 +218,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMetadata_Ctor2() As Task
             Dim workspace =
 <Workspace>
@@ -245,7 +248,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMetadata_Method() As Task
             Dim workspace =
 <Workspace>
@@ -275,7 +278,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMetadata_GenericType() As Task
             Dim workspace =
 <Workspace>
@@ -305,7 +308,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestMetadata_GenericMethod() As Task
             Dim workspace =
 <Workspace>
@@ -339,7 +342,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestNull_Parameter() As Task
             Dim workspace =
 <Workspace>
@@ -356,7 +359,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
             Await TestIsNullAsync(workspace)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestNull_Local() As Task
             Dim workspace =
 <Workspace>
@@ -376,7 +379,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
             Await TestIsNullAsync(workspace)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestCSharp_TestNull_Label() As Task
             Dim workspace =
 <Workspace>
@@ -401,7 +404,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
 
 #Region "Visual Basic Tests"
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestNamespace() As Task
             Dim workspace =
 <Workspace>
@@ -424,7 +427,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestClass() As Task
             Dim workspace =
 <Workspace>
@@ -451,7 +454,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMember_Sub() As Task
             Dim workspace =
 <Workspace>
@@ -482,7 +485,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMember_Function() As Task
             Dim workspace =
 <Workspace>
@@ -513,7 +516,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMember_Parameters() As Task
             Dim workspace =
 <Workspace>
@@ -544,7 +547,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMetadata_Class1() As Task
             Dim workspace =
 <Workspace>
@@ -571,7 +574,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMetadata_Class2() As Task
             Dim workspace =
 <Workspace>
@@ -599,7 +602,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMetadata_Ctor1() As Task
             Dim workspace =
 <Workspace>
@@ -629,7 +632,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMetadata_Ctor2() As Task
             Dim workspace =
 <Workspace>
@@ -658,7 +661,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMetadata_Method() As Task
             Dim workspace =
 <Workspace>
@@ -687,7 +690,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMetadata_GenericType() As Task
             Dim workspace =
 <Workspace>
@@ -716,7 +719,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestMetadata_GenericMethod() As Task
             Dim workspace =
 <Workspace>
@@ -748,7 +751,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
                  })
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestNull_Parameter() As Task
             Dim workspace =
 <Workspace>
@@ -765,7 +768,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
             Await TestIsNullAsync(workspace)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestNull_Local() As Task
             Dim workspace =
 <Workspace>
@@ -783,7 +786,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
             Await TestIsNullAsync(workspace)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
+        <Fact, Trait(Traits.Feature, Traits.Features.VsNavInfo)>
         Public Async Function TestVisualBasic_TestNull_Label() As Task
             Dim workspace =
 <Workspace>
@@ -807,73 +810,21 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
 
 #End Region
 
-        Private Shared Sub IsOK(comAction As Func(Of Integer))
-            Assert.Equal(VSConstants.S_OK, comAction())
-        End Sub
-
-        Private Delegate Sub NodeVerifier(vsNavInfoNode As IVsNavInfoNode)
-
-        Private Shared Function Node(expectedListType As _LIB_LISTTYPE, expectedName As String) As NodeVerifier
-            Return Sub(vsNavInfoNode)
-                       Dim listType As UInteger
-                       IsOK(Function() vsNavInfoNode.get_Type(listType))
-                       Assert.Equal(CUInt(expectedListType), listType)
-
-                       Dim actualName As String = Nothing
-                       IsOK(Function() vsNavInfoNode.get_Name(actualName))
-                       Assert.Equal(expectedName, actualName)
-                   End Sub
-        End Function
-
-        Private Shared Function Package(expectedName As String) As NodeVerifier
-            Return Node(_LIB_LISTTYPE.LLT_PACKAGE, expectedName)
-        End Function
-
-        Private Shared Function [Namespace](expectedName As String) As NodeVerifier
-            Return Node(_LIB_LISTTYPE.LLT_NAMESPACES, expectedName)
-        End Function
-
-        Private Shared Function [Class](expectedName As String) As NodeVerifier
-            Return Node(_LIB_LISTTYPE.LLT_CLASSES, expectedName)
-        End Function
-
-        Private Shared Function Member(expectedName As String) As NodeVerifier
-            Return Node(_LIB_LISTTYPE.LLT_MEMBERS, expectedName)
-        End Function
-
-        Private Shared Function Hierarchy(expectedName As String) As NodeVerifier
-            Return Node(_LIB_LISTTYPE.LLT_HIERARCHY, expectedName)
-        End Function
-
-        Private Shared Sub VerifyNodes(enumerator As IVsEnumNavInfoNodes, verifiers() As NodeVerifier)
-            Dim index = 0
-            Dim actualNode = New IVsNavInfoNode(0) {}
-            Dim fetched As UInteger
-            While enumerator.Next(1, actualNode, fetched) = VSConstants.S_OK
-                Dim verifier = verifiers(index)
-                index += 1
-
-                verifier(actualNode(0))
-            End While
-
-            Assert.Equal(index, verifiers.Length)
-        End Sub
-
         Private Shared Async Function TestAsync(
             workspaceDefinition As XElement,
             Optional useExpandedHierarchy As Boolean = False,
             Optional canonicalNodes As NodeVerifier() = Nothing,
             Optional presentationNodes As NodeVerifier() = Nothing
-        ) As Tasks.Task
+        ) As Task
 
-            Using workspace = Await TestWorkspaceFactory.CreateWorkspaceAsync(workspaceDefinition, exportProvider:=VisualStudioTestExportProvider.ExportProvider)
+            Using workspace = Await TestWorkspace.CreateAsync(workspaceDefinition, exportProvider:=VisualStudioTestExportProvider.ExportProvider)
                 Dim hostDocument = workspace.DocumentWithCursor
                 Assert.True(hostDocument IsNot Nothing, "Test defined without cursor position")
 
                 Dim document = workspace.CurrentSolution.GetDocument(hostDocument.Id)
                 Dim semanticModel = Await document.GetSemanticModelAsync()
                 Dim position As Integer = hostDocument.CursorPosition.Value
-                Dim symbol = SymbolFinder.FindSymbolAtPosition(semanticModel, position, workspace, CancellationToken.None)
+                Dim symbol = Await SymbolFinder.FindSymbolAtPositionAsync(semanticModel, position, workspace).ConfigureAwait(False)
                 Assert.True(symbol IsNot Nothing, $"Could not find symbol as position, {position}")
 
                 Dim libraryService = document.Project.LanguageServices.GetService(Of ILibraryService)
@@ -885,14 +836,14 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
 
                 If canonicalNodes IsNot Nothing Then
                     Dim enumerator As IVsEnumNavInfoNodes = Nothing
-                    IsOK(Function() navInfo.EnumCanonicalNodes(enumerator))
+                    IsOK(navInfo.EnumCanonicalNodes(enumerator))
 
                     VerifyNodes(enumerator, canonicalNodes)
                 End If
 
                 If presentationNodes IsNot Nothing Then
                     Dim enumerator As IVsEnumNavInfoNodes = Nothing
-                    IsOK(Function() navInfo.EnumPresentationNodes(CUInt(_LIB_LISTFLAGS.LLF_NONE), enumerator))
+                    IsOK(navInfo.EnumPresentationNodes(CUInt(_LIB_LISTFLAGS.LLF_NONE), enumerator))
 
                     VerifyNodes(enumerator, presentationNodes)
                 End If
@@ -902,16 +853,16 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.VsNavInfo
         Private Shared Async Function TestIsNullAsync(
             workspaceDefinition As XElement,
             Optional useExpandedHierarchy As Boolean = False
-        ) As Tasks.Task
+        ) As Task
 
-            Using workspace = Await TestWorkspaceFactory.CreateWorkspaceAsync(workspaceDefinition, exportProvider:=VisualStudioTestExportProvider.ExportProvider)
+            Using workspace = Await TestWorkspace.CreateAsync(workspaceDefinition, exportProvider:=VisualStudioTestExportProvider.ExportProvider)
                 Dim hostDocument = workspace.DocumentWithCursor
                 Assert.True(hostDocument IsNot Nothing, "Test defined without cursor position")
 
                 Dim document = workspace.CurrentSolution.GetDocument(hostDocument.Id)
                 Dim semanticModel = Await document.GetSemanticModelAsync()
                 Dim position As Integer = hostDocument.CursorPosition.Value
-                Dim symbol = SymbolFinder.FindSymbolAtPosition(semanticModel, position, workspace, CancellationToken.None)
+                Dim symbol = Await SymbolFinder.FindSymbolAtPositionAsync(semanticModel, position, workspace).ConfigureAwait(False)
                 Assert.True(symbol IsNot Nothing, $"Could not find symbol as position, {position}")
 
                 Dim libraryService = document.Project.LanguageServices.GetService(Of ILibraryService)

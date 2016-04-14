@@ -1319,5 +1319,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         ERR_BadAwaitInStaticVariableInitializer = 8100,
         ERR_InvalidPathMap = 8101,
         ERR_PublicSignButNoKey = 8102,
+        ERR_TooManyUserStrings = 8103,
+        ERR_PeWritingFailure = 8104,
     }
 }

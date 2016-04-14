@@ -1,9 +1,12 @@
-﻿using System;
+﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.CodeAnalysis.Utilities.ForegroundThreadDataKind;
 
 namespace Microsoft.CodeAnalysis.Utilities
 {
@@ -11,6 +14,8 @@ namespace Microsoft.CodeAnalysis.Utilities
     {
         Wpf,
         StaUnitTest,
+        JoinableTask,
+        ForcedByPackageInitialize,
         Unknown
     }
 
@@ -21,16 +26,27 @@ namespace Microsoft.CodeAnalysis.Utilities
 
         static ForegroundThreadDataInfo()
         {
-            s_fallbackForegroundThreadDataKind = CreateDefault();
+            s_fallbackForegroundThreadDataKind = CreateDefault(Unknown);
         }
 
-        internal static ForegroundThreadDataKind CreateDefault()
+        internal static ForegroundThreadDataKind CreateDefault(ForegroundThreadDataKind defaultKind)
         {
-            var kind = SynchronizationContext.Current?.GetType().FullName == "System.Windows.Threading.DispatcherSynchronizationContext"
-                    ? ForegroundThreadDataKind.Wpf
-                    : ForegroundThreadDataKind.Unknown;
+            var syncConextTypeName = SynchronizationContext.Current?.GetType().FullName;
 
-            return kind;
+            switch (syncConextTypeName)
+            {
+                case "System.Windows.Threading.DispatcherSynchronizationContext":
+
+                    return Wpf;
+
+                case "Microsoft.VisualStudio.Threading.JoinableTask+JoinableTaskSynchronizationContext":
+
+                    return JoinableTask;
+
+                default:
+
+                    return defaultKind;
+            }
         }
 
         internal static ForegroundThreadDataKind CurrentForegroundThreadDataKind

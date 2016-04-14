@@ -11,7 +11,7 @@ Namespace Microsoft.CodeAnalysis.Editor.VisualBasic.UnitTests.CodeRefactorings.E
             Return New EncapsulateFieldRefactoringProvider()
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulatePrivateFieldAndUpdateReferences() As Task
             Dim text = <File>
 Class C
@@ -49,7 +49,7 @@ End Class</File>.ConvertTestSourceTag()
 
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateDimField() As Task
             Dim text = <File>
 Class C
@@ -82,7 +82,7 @@ End Class</File>.ConvertTestSourceTag()
 
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateGenericField() As Task
             Dim text = <File>
 Class C(Of T)
@@ -115,7 +115,7 @@ End Class</File>.ConvertTestSourceTag()
 
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulatePublicFieldIgnoringReferences() As Task
             Dim text = <File>
 Class C
@@ -147,7 +147,7 @@ End Class</File>.ConvertTestSourceTag()
             Await TestAsync(text, expected, compareTokens:=False, index:=1)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulatePublicFieldUpdatingReferences() As Task
             Dim text = <File>
 Class C
@@ -179,7 +179,7 @@ End Class</File>.ConvertTestSourceTag()
             Await TestAsync(text, expected, compareTokens:=False, index:=0)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateMultiplePrivateFieldsWithReferences() As Task
             Dim text = <File>
 Class C
@@ -222,7 +222,7 @@ End Class</File>.ConvertTestSourceTag()
             Await TestAsync(text, expected, compareTokens:=False, index:=0)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateMultiplePublicFieldsWithReferences() As Task
             Dim text = <File>
 Class C
@@ -267,7 +267,7 @@ End Class</File>.ConvertTestSourceTag()
             Await TestAsync(text, expected, compareTokens:=False, index:=1)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestNoSetterForConstField() As Task
             Dim text = <File>
 Class Program
@@ -289,7 +289,7 @@ End Class</File>.ConvertTestSourceTag()
 
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateEscapedIdentifier() As Task
             Dim text = <File>
 Class C
@@ -314,7 +314,7 @@ End Class</File>.ConvertTestSourceTag()
 
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateFieldNamedValue() As Task
             Dim text = <File>
 Class C
@@ -339,7 +339,7 @@ End Class</File>.ConvertTestSourceTag()
 
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateFieldName__() As Task
             Dim text = <File>
 Class D
@@ -365,8 +365,8 @@ End Class
             Await TestAsync(text, expected, compareTokens:=False)
         End Function
 
-        <WorkItem(694262)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <WorkItem(694262, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/694262")>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestPreserveTrivia() As Task
             Dim text = <File>
 Class AA
@@ -392,8 +392,8 @@ End Class
             Await TestAsync(text, expected, compareTokens:=False)
         End Function
 
-        <WorkItem(694241)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <WorkItem(694241, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/694241")>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestNewPropertyNameIsUnique() As Task
             Dim text = <File>
 Class AA
@@ -435,8 +435,8 @@ End Class
             Await TestAsync(text, expected, compareTokens:=False)
         End Function
 
-        <WorkItem(695046)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <WorkItem(695046, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/695046")>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestAvailableNotJustOnVariableName() As Task
             Dim text = <File>
 Class C
@@ -446,8 +446,8 @@ End Class</File>.ConvertTestSourceTag()
             Await TestActionCountAsync(text, 2)
         End Function
 
-        <WorkItem(705898)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <WorkItem(705898, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/705898")>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestCopyAccessibility() As Task
             Dim text = <File>
 Class C
@@ -471,8 +471,8 @@ End Class</File>.ConvertTestSourceTag()
             Await TestAsync(text, expected, compareTokens:=False)
         End Function
 
-        <WorkItem(707080)>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <WorkItem(707080, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/707080")>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestBackingFieldStartsWithUnderscore() As Task
             Dim text = <File>
 Public Class Class1
@@ -504,7 +504,7 @@ End Class</File>.ConvertTestSourceTag()
             Await TestAsync(text, expected, compareTokens:=False)
         End Function
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestEncapsulateShadowingField() As Task
             Dim text = <File>
 Class C
@@ -559,7 +559,7 @@ End Class</File>.ConvertTestSourceTag()
         End Function
 
         <WorkItem(1096007, "https://github.com/dotnet/roslyn/issues/282")>
-        <WpfFact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
+        <Fact, Trait(Traits.Feature, Traits.Features.EncapsulateField)>
         Public Async Function TestDoNotEncapsulateOutsideTypeDeclaration() As Task
             Dim globalField = <File>
 Dim [|x|] = 1

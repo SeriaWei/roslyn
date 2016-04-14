@@ -24,7 +24,7 @@ Namespace Microsoft.VisualStudio.LanguageServices.UnitTests.Diagnostics
             Dim code = <code>
 class 123 { }
                        </code>
-            Using workspace = Await CSharpWorkspaceFactory.CreateWorkspaceFromLinesAsync(code.ToString())
+            Using workspace = Await TestWorkspace.CreateCSharpAsync(code.ToString())
                 Dim miscService = New MiscellaneousDiagnosticAnalyzerService(
                     New TestDiagnosticAnalyzerService(DiagnosticExtensions.GetCompilerDiagnosticAnalyzersMap()),
                     New MockDiagnosticUpdateSourceRegistrationService())
@@ -43,6 +43,7 @@ class 123 { }
 
                 Dim buffer = workspace.Documents.First().GetTextBuffer()
 
+                WpfTestCase.RequireWpfFact("This test uses IForegroundNotificationService")
                 Dim foregroundService = workspace.GetService(Of IForegroundNotificationService)()
                 Dim provider = New DiagnosticsSquiggleTaggerProvider(optionsService, diagnosticService, foregroundService, listeners)
                 Dim tagger = provider.CreateTagger(Of IErrorTag)(buffer)
@@ -61,12 +62,12 @@ class 123 { }
             End Using
         End Function
 
-        <WpfFact>
+        <Fact>
         Public Async Function TestMiscCSharpErrorSource() As Tasks.Task
             Dim code = <code>
 class 123 { }
                        </code>
-            Using workspace = Await CSharpWorkspaceFactory.CreateWorkspaceFromLinesAsync(code.ToString())
+            Using workspace = Await TestWorkspace.CreateCSharpAsync(code.ToString())
                 Dim miscService = New MiscellaneousDiagnosticAnalyzerService(
                     New TestDiagnosticAnalyzerService(DiagnosticExtensions.GetCompilerDiagnosticAnalyzersMap()),
                     New MockDiagnosticUpdateSourceRegistrationService())
@@ -85,13 +86,13 @@ class 123 { }
             End Using
         End Function
 
-        <WpfFact>
+        <Fact>
         Public Async Function TestMiscVBErrorSource() As Task
             Dim code = <code>
 Class 123
 End Class
                        </code>
-            Using workspace = Await VisualBasicWorkspaceFactory.CreateWorkspaceFromLinesAsync(code.ToString())
+            Using workspace = Await TestWorkspace.CreateVisualBasicAsync(code.ToString())
                 Dim miscService = New MiscellaneousDiagnosticAnalyzerService(
                     New TestDiagnosticAnalyzerService(DiagnosticExtensions.GetCompilerDiagnosticAnalyzersMap()),
                     New MockDiagnosticUpdateSourceRegistrationService())
